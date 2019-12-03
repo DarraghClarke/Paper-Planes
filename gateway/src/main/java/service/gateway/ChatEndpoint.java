@@ -1,43 +1,58 @@
 package service.gateway;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
 
-import javax.websocket.EncodeException;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
+//based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#server-example
 
-@ServerEndpoint(value = "/chat/{username}")//, decoders = MessageDecoder.class, encoders = MessageEncoder.class)
-public class ChatEndpoint {
-    private Session session;
-    private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
-    private static HashMap<String, String> users = new HashMap<>();
+public class ChatEndpoint extends WebSocketServer {
 
-    @OnOpen
-    public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
-        //when we get a new user
+    public ChatEndpoint(InetSocketAddress address) {
+        super(address);
     }
 
-    @OnMessage
-    public void onMessage() throws IOException, EncodeException {
-        //do something with input
+    @Override
+    public void onOpen(WebSocket conn, ClientHandshake handshake) {
+        conn.send("Welcome to the server!"); //This method sends a message to the new client
+        broadcast( "new connection: " + handshake.getResourceDescriptor() ); //This method sends a message to all clients connected
+        System.out.println("new connection to " + conn.getRemoteSocketAddress());
     }
 
-    @OnClose
-    public void onClose(Session session) throws IOException, EncodeException {
-        //do something
+    @Override
+    public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+        System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
     }
 
-    @OnError
-    public void onError(Session session, Throwable throwable) {
-        // Do error handling here
+    @Override
+    public void onMessage(WebSocket conn, String message) {
+        System.out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
+        conn.send("returning message you sent : "+message);
     }
 
+    @Override
+    public void onMessage( WebSocket conn, ByteBuffer message ) {
+        System.out.println("received ByteBuffer from "	+ conn.getRemoteSocketAddress());
+    }
+
+    @Override
+    public void onError(WebSocket conn, Exception ex) {
+        System.err.println("an error occurred on connection " + conn.getRemoteSocketAddress()  + ":" + ex);
+    }
+
+    @Override
+    public void onStart() {
+        System.out.println("server started successfully");
+    }
+
+
+    public static void main(String[] args) {
+        String host = "localhost";
+        int port = 8080;
+
+        WebSocketServer server = new ChatEndpoint(new InetSocketAddress(host, port));
+        server.run();
+    }
 }
