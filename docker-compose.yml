@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  client:
+    image: "client:latest"
+    depends_on:
+      - gateway
+
+  gateway:
+    image: "gateway:latest"
+    ports:
+      - "8080:8080"
