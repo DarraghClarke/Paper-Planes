@@ -1,10 +1,14 @@
 package service.gateway;
-import java.net.InetSocketAddress;
+import java.net.*;
 import java.nio.ByteBuffer;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.client.RestTemplate;
+
+
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#server-example
 
@@ -44,9 +48,42 @@ public class ChatEndpoint extends WebSocketServer {
 
     @Override
     public void onStart() {
+        try {
+            connectToLoadBalancer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.out.println("server started successfully");
     }
 
+    public void connectToLoadBalancer() throws Exception{
+
+//        URL obj = new URL("http://localhost:8081/addGateway");
+//        HttpURLConnection postConnection = (HttpURLConnection) obj.openConnection();
+//        postConnection.setRequestMethod("POST");
+//        postConnection.setRequestProperty("Content-Type", "application/json; utf-8");
+//        postConnection.setRequestProperty("Accept", "application/json");
+//        postConnection.setDoOutput(true);
+//        String jsonInputString = "{\"ipaddress\": \""+getAddress().toString()+"\", \"job\": \"Programmer\"}";
+//        try(OutputStream os = postConnection.getOutputStream()) {
+//            byte[] input = jsonInputString.getBytes("utf-8");
+//            System.out.println(input);
+//            os.write(input, 0, input.length);
+//        }
+
+
+        RestTemplate restTemplate = new RestTemplate();
+        InetSocketAddress a=getAddress();
+        System.out.println(a);
+        URL gatewayAddress = new URL("http://"+a.toString());
+
+        HttpEntity<URL> request = new HttpEntity<>(gatewayAddress);
+
+        restTemplate.postForObject("http://localhost:8081/addGateway", request, URL.class);
+
+        //System.out.println(foo);
+    }
 
     public static void main(String[] args) {
         String host = "localhost";
