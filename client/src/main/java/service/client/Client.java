@@ -1,11 +1,13 @@
 package service.client;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Scanner;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.springframework.web.client.RestTemplate;
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#client-example
 
@@ -22,6 +24,7 @@ public class Client extends WebSocketClient {
         send(readString);
         System.out.println("new connection opened");
     }
+
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
@@ -44,7 +47,10 @@ public class Client extends WebSocketClient {
     }
 
     public static void main(String[] args) throws URISyntaxException {
-        WebSocketClient client = new Client(new URI("ws://localhost:8080"));
+        RestTemplate restTemplate = new RestTemplate();
+        String temp = restTemplate.getForObject("http://localhost:8081/getGateway", String.class);
+        System.out.println(temp);
+        WebSocketClient client = new Client(new URI( "ws://"+temp+"/"));
         client.connect();
     }
 }

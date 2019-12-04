@@ -59,28 +59,16 @@ public class ChatEndpoint extends WebSocketServer {
 
     public void connectToLoadBalancer() throws Exception{
 
-//        URL obj = new URL("http://localhost:8081/addGateway");
-//        HttpURLConnection postConnection = (HttpURLConnection) obj.openConnection();
-//        postConnection.setRequestMethod("POST");
-//        postConnection.setRequestProperty("Content-Type", "application/json; utf-8");
-//        postConnection.setRequestProperty("Accept", "application/json");
-//        postConnection.setDoOutput(true);
-//        String jsonInputString = "{\"ipaddress\": \""+getAddress().toString()+"\", \"job\": \"Programmer\"}";
-//        try(OutputStream os = postConnection.getOutputStream()) {
-//            byte[] input = jsonInputString.getBytes("utf-8");
-//            System.out.println(input);
-//            os.write(input, 0, input.length);
-//        }
-
 
         RestTemplate restTemplate = new RestTemplate();
-        InetSocketAddress a=getAddress();
-        System.out.println(a);
-        URL gatewayAddress = new URL("http://"+a.toString());
+        //InetSocketAddress a=getAddress().getHostName();
+        //System.out.println(a);
+        String gatewayAddress = getAddress().getHostString() +":" + getAddress().getPort();
 
-        HttpEntity<URL> request = new HttpEntity<>(gatewayAddress);
 
-        restTemplate.postForObject("http://localhost:8081/addGateway", request, URL.class);
+        HttpEntity<String> request = new HttpEntity<>(gatewayAddress);
+
+        restTemplate.postForObject("http://localhost:8081/addGateway", request, String.class);
 
         //System.out.println(foo);
     }
