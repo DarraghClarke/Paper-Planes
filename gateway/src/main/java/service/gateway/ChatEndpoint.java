@@ -1,4 +1,5 @@
 package service.gateway;
+
 import java.net.*;
 import java.nio.ByteBuffer;
 
@@ -7,7 +8,6 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
-
 
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#server-example
@@ -21,7 +21,7 @@ public class ChatEndpoint extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         conn.send("Welcome to the server!"); //This method sends a message to the new client
-        broadcast( "new connection: " + handshake.getResourceDescriptor() ); //This method sends a message to all clients connected
+        broadcast("new connection: " + handshake.getResourceDescriptor()); //This method sends a message to all clients connected
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
     }
 
@@ -32,45 +32,32 @@ public class ChatEndpoint extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
-        conn.send("returning message you sent : "+message);
+        System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
+        conn.send("returning message you sent : " + message);
     }
 
     @Override
-    public void onMessage( WebSocket conn, ByteBuffer message ) {
-        System.out.println("received ByteBuffer from "	+ conn.getRemoteSocketAddress());
+    public void onMessage(WebSocket conn, ByteBuffer message) {
+        System.out.println("received ByteBuffer from " + conn.getRemoteSocketAddress());
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        System.err.println("an error occurred on connection " + conn.getRemoteSocketAddress()  + ":" + ex);
+        System.err.println("an error occurred on connection " + conn.getRemoteSocketAddress() + ":" + ex);
     }
 
     @Override
     public void onStart() {
-        try {
-            connectToLoadBalancer();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        connectToLoadBalancer();
         System.out.println("server started successfully");
     }
 
-    public void connectToLoadBalancer() throws Exception{
-
-
+    public void connectToLoadBalancer() {
         RestTemplate restTemplate = new RestTemplate();
-        //InetSocketAddress a=getAddress().getHostName();
-        //System.out.println(a);
-        String gatewayAddress = getAddress().getHostString() +":" + getAddress().getPort();
-
-
+        String gatewayAddress = getAddress().getHostString() + ":" + getAddress().getPort();
         HttpEntity<String> request = new HttpEntity<>(gatewayAddress);
 
         restTemplate.postForObject("http://localhost:8081/addGateway", request, String.class);
-
-        //System.out.println(foo);
     }
 
     public static void main(String[] args) {
