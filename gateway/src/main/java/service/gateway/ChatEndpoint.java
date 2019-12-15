@@ -9,7 +9,6 @@ import org.java_websocket.server.WebSocketServer;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 
-
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#server-example
 
 public class ChatEndpoint extends WebSocketServer {
