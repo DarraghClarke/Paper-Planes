@@ -21,31 +21,28 @@ public class Balancer {
     }
 
     public String findGatewayToReturn() {
-        Boolean alive = false;
-        String gatewayToReturn = null;
         int random = new Random(System.currentTimeMillis()).nextInt(gateways.size());
+        boolean returnedAlive = false;
 
-        try {
-            alive = checkGatewayHealth(gateways.get(random).toString());
-            gatewayToReturn = gateways.get(random).toString();
-        } catch (IOException e) {
-            e.printStackTrace();
+        while (!returnedAlive) {
+            try {
+                returnedAlive = checkGatewayHealth(gateways.get(random).toString());
+                if (!returnedAlive) {
+                    //the gateway is dead so we should remove it and try again from the remaining list
+                    gateways.remove(random);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        if (!alive) {
-            //the gateway is dead so we should remove it and try again from the remaining list
-            gateways.remove(random);
-            findGatewayToReturn();
-        }
-        //if its alive return the gateway
-        return gatewayToReturn;
+        return gateways.get(random).toString();
     }
 
-    public Boolean checkGatewayHealth(String gateway) throws IOException {
+    public boolean checkGatewayHealth(String gateway) throws IOException {
         String[] ipAddress = gateway.split(":");//this seperates the ip address from the port
         InetAddress address = InetAddress.getByName(ipAddress[0]);
-        Boolean reachable = address.isReachable(10000);
-        return reachable;
+        return address.isReachable(10000);
     }
 
     @PostMapping("/addGateway")
