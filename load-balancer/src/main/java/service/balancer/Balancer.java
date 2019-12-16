@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -13,13 +12,13 @@ import java.util.Random;
 @RestController
 public class Balancer {
 
-    List gateways = new ArrayList<String>();
+    List<String> gateways = new ArrayList<>();
 
     @GetMapping("/getGateway")
     public String getGateway() {
-        if (gateways.isEmpty()){
+        if (gateways.isEmpty()) {
             throw new InternalError("No Gateways Available");
-        }else {
+        } else {
             return findGatewayToReturn();
         }
     }
@@ -42,7 +41,7 @@ public class Balancer {
             }
         }
 
-        return gateways.get(random).toString();
+        return gateways.get(random);
     }
 
     public boolean checkGatewayHealth(String gateway) throws IOException {
