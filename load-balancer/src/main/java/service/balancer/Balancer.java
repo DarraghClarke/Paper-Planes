@@ -17,14 +17,20 @@ public class Balancer {
 
     @GetMapping("/getGateway")
     public String getGateway() {
-        return findGatewayToReturn();
+        if (gateways.isEmpty()){
+            throw new InternalError("No Gateways Available");
+        }else {
+            return findGatewayToReturn();
+        }
     }
 
     public String findGatewayToReturn() {
-        int random = new Random(System.currentTimeMillis()).nextInt(gateways.size());
+        Random numberGenerator = new Random(System.currentTimeMillis());
+        int random = 0;
         boolean returnedAlive = false;
 
         while (!returnedAlive) {
+            random = numberGenerator.nextInt(gateways.size());
             try {
                 returnedAlive = checkGatewayHealth(gateways.get(random).toString());
                 if (!returnedAlive) {
