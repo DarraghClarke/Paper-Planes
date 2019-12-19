@@ -2,7 +2,11 @@ package service.gateway;
 
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import message.Message;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -20,8 +24,6 @@ public class ChatEndpoint extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        conn.send("Welcome to the server!"); //This method sends a message to the new client
-        broadcast("new connection: " + handshake.getResourceDescriptor()); //This method sends a message to all clients connected
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
     }
 
@@ -32,8 +34,22 @@ public class ChatEndpoint extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        //tbh gateway probably won't unpack this message, instead passing it on, but for now just to prove this works it will
+        Gson gson = new Gson();
+        Message msg = gson.fromJson(message, Message.class);
         System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
-        conn.send("returning message you sent : " + message);
+
+
+        //sample code
+        Message Response = new Message();
+        Response.setMessage("returning message: "+msg.getMessage());
+        Response.setSender("Gateway");
+        Response.setReciever(msg.getSender());
+        Response.setTime(Instant.now());
+
+        Gson builder = new GsonBuilder().setPrettyPrinting().create();
+        String jsonStr = builder.toJson(Response);
+        conn.send(jsonStr);
     }
 
     @Override
