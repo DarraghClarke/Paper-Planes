@@ -7,16 +7,21 @@ import java.time.Instant;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import message.Message;
+import message.SessionMessage;
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 
+import javax.jms.*;
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#server-example
 
 public class ChatEndpoint extends WebSocketServer {
+    MessageProducer producer;
+    Session session;
 
     public ChatEndpoint(InetSocketAddress address) {
         super(address);
@@ -39,6 +44,12 @@ public class ChatEndpoint extends WebSocketServer {
         Message msg = gson.fromJson(message, Message.class);
         System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
 
+        try {
+            SessionMessage sessionMessage = new SessionMessage(msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString());
+            producer.send(session.createObjectMessage(sessionMessage));
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
 
         //sample code
         Message Response = new Message();
@@ -66,6 +77,21 @@ public class ChatEndpoint extends WebSocketServer {
     public void onStart() {
         connectToLoadBalancer();
         System.out.println("server started successfully");
+
+        String host = "localhost";
+
+        try {
+            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://" + host + ":61616");
+            Connection connection = factory.createConnection();
+            connection.setClientID("sessions");
+            session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
+            connection.start();
+
+            Queue requestsQueue = session.createQueue("SESSIONS");
+            producer = session.createProducer(requestsQueue);
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
     }
 
     public void connectToLoadBalancer() {

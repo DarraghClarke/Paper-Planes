@@ -2,8 +2,9 @@ package service.session;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import message.Session;
+import message.SessionMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
@@ -26,7 +27,9 @@ public class ReceivingSessionsThread implements Runnable {
     @Override
     public void run() {
         try {
-            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://" + host + ":61616");
+            Thread.sleep(10000);
+            //todo get rid of this hardcoding
+            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://" + "activemq" + ":61616");
             Connection connection = factory.createConnection();
             connection.setClientID("sessions");
             javax.jms.Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
@@ -41,11 +44,11 @@ public class ReceivingSessionsThread implements Runnable {
                 Message message = consumer.receive();
                 if (message instanceof ObjectMessage) {
                     Object content = ((ObjectMessage) message).getObject();
-                    if (content instanceof Session) {
-                        Session response = (Session) content;
+                    if (content instanceof SessionMessage) {
+                        SessionMessage response = (SessionMessage) content;
 
                         DBObject object = new BasicDBObject()
-                                .append("user_id", response.getUserId())
+                                .append("user_id", response.getUsername())
                                 .append("timestamp", response.getTimestamp())
                                 .append("gateway", response.getGateway());
 
@@ -53,9 +56,19 @@ public class ReceivingSessionsThread implements Runnable {
                     }
                     // Finally, we acknowledge the message
                     message.acknowledge();
+
+                    DBCursor cursor = collection.find();
+
+                    System.out.println("Status update:\nWe've got: " + cursor.size());
+
+                    while(cursor.hasNext()) {
+                        System.out.println(cursor.next().toString());
+                    }
+
+                    System.out.println(collection.find());
                 }
             }
-        } catch (JMSException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
