@@ -1,28 +1,48 @@
 package service.session;
 
-import com.mongodb.*;
 
+import com.mongodb.*;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import message.SessionMessage;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 
 @RestController
 public class SessionsService {
-    private DBCollection collection;
+    private MongoCollection<SessionMessage> collection;
 
     public SessionsService() {
         try {
-            MongoClient mongoClient = new MongoClient(new MongoClientURI("mongodb://" + "mongo" + ":27017"));
-            DB database = mongoClient.getDB("sessions");
-            collection = database.getCollection("sessions");
+            CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
+                    fromProviders(PojoCodecProvider.builder().automatic(true).register(SessionMessage.class).build()));
+
+            MongoClient mongoClient = new MongoClient("mongodb://" + "mongo" + ":27017",
+                    MongoClientOptions.builder().codecRegistry(pojoCodecRegistry).build());
+            MongoDatabase database = mongoClient.getDatabase("sessions");
+
+            collection = database.getCollection("sessions", SessionMessage.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @RequestMapping(value="{reference}",method=RequestMethod.GET)
+    @RequestMapping(value="sessions/{reference}",method=RequestMethod.GET)
     public SessionMessage getSession(@PathVariable("user_id") String userId) {
-        DBObject object = collection.findOne(new BasicDBObject().append("user_id", userId));
-        return new SessionMessage((long) object.get("user_id"), (String) object.get("timestamp"), (String) object.get("gateway"));
+        return collection.find(new BasicDBObject().append("user_id", userId)).first();
+    }
+
+    @RequestMapping(value="sessions",
+            method=RequestMethod.GET)
+    public List<SessionMessage> getSessions() {
+        return collection.find().into(new ArrayList<>());
     }
 }

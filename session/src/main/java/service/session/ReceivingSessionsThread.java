@@ -1,9 +1,7 @@
 package service.session;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import message.SessionMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -13,10 +11,10 @@ import javax.jms.*;
  * Thread for handling applications from the RESPONSES queue
  */
 public class ReceivingSessionsThread implements Runnable {
-    private DBCollection collection;
+    private MongoCollection<SessionMessage> collection;
     private String host;
 
-    ReceivingSessionsThread(DBCollection collection, String host) {
+    ReceivingSessionsThread(MongoCollection<SessionMessage> collection, String host) {
         this.collection = collection;
         this.host = host;
     }
@@ -47,22 +45,18 @@ public class ReceivingSessionsThread implements Runnable {
                     if (content instanceof SessionMessage) {
                         SessionMessage response = (SessionMessage) content;
 
-                        DBObject object = new BasicDBObject()
-                                .append("user_id", response.getUsername())
-                                .append("timestamp", response.getTimestamp())
-                                .append("gateway", response.getGateway());
-
-                        collection.insert(object);
+                        collection.insertOne(response);
                     }
                     // Finally, we acknowledge the message
                     message.acknowledge();
 
-                    DBCursor cursor = collection.find();
+                    FindIterable<SessionMessage> cursor = collection.find();
 
-                    System.out.println("Status update:\nWe've got: " + cursor.size());
+                    System.out.println("Status update:\nWe've got: " + collection.countDocuments());
 
-                    while(cursor.hasNext()) {
-                        System.out.println(cursor.next().toString());
+                    for (SessionMessage sessionMessage : cursor) {
+                        System.out.println(sessionMessage.getUsername() + " - " + sessionMessage.getGateway()
+                                + " - " + sessionMessage.getTimestamp());
                     }
 
                     System.out.println(collection.find());
