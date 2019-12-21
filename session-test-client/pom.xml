@@ -4,17 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>paper-planes</groupId>
-    <artifactId>balancer</artifactId>
+    <artifactId>session-test-client</artifactId>
     <version>0.1.0</version>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.6.RELEASE</version>
-    </parent>
-
     <properties>
-        <main.class>service.balancer.client.Application</main.class>
+        <main.class>client.Application</main.class>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
@@ -22,33 +16,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.7.0</version>
         </dependency>
         <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <scope>test</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.2</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>5.1.8.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <version>2.1.6.RELEASE</version>
+            <groupId>paper-planes</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
             <!-- Plugin used to run Java programs -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
