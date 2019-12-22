@@ -2,10 +2,15 @@ package client;
 
 import message.SessionMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import javax.jms.*;
 import java.net.InetAddress;
 import java.time.Instant;
+import java.util.List;
 
 public class Application {
     public static void main(String[] args) {
@@ -39,7 +44,23 @@ public class Application {
             System.out.println("Sending message...");
             producer.send(session.createObjectMessage(sessionMessage));
             System.out.println("sent message");
-        } catch (Exception e) {
+
+            Thread.sleep(3000);
+
+            System.out.println("rest time...");
+            RestTemplate restTemplate = new RestTemplate();
+
+            ResponseEntity<List<SessionMessage>> rateResponse =
+                    restTemplate.exchange("http://session:8080/sessions",
+                            HttpMethod.GET, null, new ParameterizedTypeReference<List<SessionMessage>>() {
+                            });
+            System.out.println("Code: " + rateResponse.getStatusCodeValue());
+            List<SessionMessage> messages = rateResponse.getBody();
+            System.out.println("There are " + messages.size() + " messages. Neat.");
+            for (SessionMessage message : messages) {
+                System.out.println("Content: " + message.getTimestamp() + " - " + message.getUsername() + " - " + message.getGateway());
+            }
+       } catch (Exception e) {
             e.printStackTrace();
         }
     }

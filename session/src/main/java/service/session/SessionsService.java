@@ -5,16 +5,10 @@ import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import message.SessionMessage;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
-
 
 @RestController
 public class SessionsService {
@@ -22,13 +16,8 @@ public class SessionsService {
 
     public SessionsService() {
         try {
-            CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
-                    fromProviders(PojoCodecProvider.builder().automatic(true).register(SessionMessage.class).build()));
-
-            MongoClient mongoClient = new MongoClient("mongodb://" + "mongo" + ":27017",
-                    MongoClientOptions.builder().codecRegistry(pojoCodecRegistry).build());
+            MongoClient mongoClient = SingletonMongoClient.getInstance();
             MongoDatabase database = mongoClient.getDatabase("sessions");
-
             collection = database.getCollection("sessions", SessionMessage.class);
         } catch (Exception e) {
             e.printStackTrace();
