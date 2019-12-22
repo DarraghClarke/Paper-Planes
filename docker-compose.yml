@@ -9,27 +9,27 @@ services:
     build: gateway
     ports:
       - "8080:8080"
-    depends_on:
-      - load-balancer
-  load-balancer:
-    build: load-balancer
-    ports:
-      - "8081:8081"
-    depends_on:
-      - session
-  session:
-    build: session
-    depends_on:
-      - mongo
-      - activemq
-  activemq:
-    image: rmohr/activemq:latest
-    container_name: activemq
-    ports:
-      - "8161:8161"
-      - "61616:61616"
-  mongo:
-    image: mongo:4.0.4
+#    depends_on:
+#      - load-balancer
+#  load-balancer:
+#    build: load-balancer
+#    ports:
+#      - "8081:8081"
+#    depends_on:
+#      - session
+#  session:
+#    build: session
+#    depends_on:
+#      - mongo
+#      - activemq
+#  activemq:
+#    image: rmohr/activemq:latest
+#    container_name: activemq
+#    ports:
+#      - "8161:8161"
+#      - "61616:61616"
+#  mongo:
+#    image: mongo:4.0.4
 #  session-test-client:
 #    build: session-test-client
 #    depends_on:
