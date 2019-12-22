@@ -132,7 +132,13 @@ public class ChatEndpoint extends WebSocketServer {
         String gatewayAddress = getAddress().getHostString() + ":" + getAddress().getPort();
         HttpEntity<String> request = new HttpEntity<>(gatewayAddress);
 
-        restTemplate.postForObject("http://localhost:8081/addGateway", request, String.class);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        restTemplate.postForObject("http://load-balancer:8081/addGateway", request, String.class);
     }
 
     public static void main(String[] args) {
