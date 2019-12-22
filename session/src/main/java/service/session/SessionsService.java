@@ -1,28 +1,37 @@
 package service.session;
 
-import com.mongodb.*;
 
+import com.mongodb.*;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import message.SessionMessage;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class SessionsService {
-    private DBCollection collection;
+    private MongoCollection<SessionMessage> collection;
 
     public SessionsService() {
         try {
-            MongoClient mongoClient = new MongoClient(new MongoClientURI("mongodb://" + "mongo" + ":27017"));
-            DB database = mongoClient.getDB("sessions");
-            collection = database.getCollection("sessions");
+            MongoClient mongoClient = SingletonMongoClient.getInstance();
+            MongoDatabase database = mongoClient.getDatabase("sessions");
+            collection = database.getCollection("sessions", SessionMessage.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @RequestMapping(value="{reference}",method=RequestMethod.GET)
+    @RequestMapping(value="sessions/{reference}",method=RequestMethod.GET)
     public SessionMessage getSession(@PathVariable("user_id") String userId) {
-        DBObject object = collection.findOne(new BasicDBObject().append("user_id", userId));
-        return new SessionMessage((long) object.get("user_id"), (String) object.get("timestamp"), (String) object.get("gateway"));
+        return collection.find(new BasicDBObject().append("user_id", userId)).first();
+    }
+
+    @RequestMapping(value="sessions",
+            method=RequestMethod.GET)
+    public List<SessionMessage> getSessions() {
+        return collection.find().into(new ArrayList<>());
     }
 }
