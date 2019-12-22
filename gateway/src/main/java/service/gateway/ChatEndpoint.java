@@ -3,6 +3,8 @@ package service.gateway;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,7 +14,10 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import javax.jms.*;
@@ -52,15 +57,43 @@ public class ChatEndpoint extends WebSocketServer {
         }
 
         //sample code
-        Message Response = new Message();
-        Response.setMessage("returning message: "+msg.getMessage());
-        Response.setSender("Gateway");
-        Response.setReciever(msg.getSender());
-        Response.setTime(Instant.now());
+//        Message Response = new Message();
+//        Response.setMessage("returning message: "+msg.getMessage());
+//        Response.setSender("Gateway");
+//        Response.setReciever(msg.getSender());
+//        Response.setTime(Instant.now());
+        // long timestamp, String username, String gateway
+//
+//        List<SessionMessage> Response = new ArrayList<>();
+//        Response.add(new SessionMessage(19l,"big Tom","this gateway idk"));
+//        Response.add(new SessionMessage(29l,"GIT","this gateway idk"));
+        try {
+            SessionMessage sessionMessage = new SessionMessage(Instant.now().getEpochSecond(), "oisinq-baby", InetAddress.getLocalHost().toString()); // (msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString()
+            System.out.println("Sending message...");
+            producer.send(session.createObjectMessage(sessionMessage));
+            System.out.println("sent message");
 
-        Gson builder = new GsonBuilder().setPrettyPrinting().create();
-        String jsonStr = builder.toJson(Response);
-        conn.send(jsonStr);
+            Thread.sleep(3000);
+
+            System.out.println("rest time...");
+            RestTemplate restTemplate = new RestTemplate();
+
+            ResponseEntity<List<SessionMessage>> rateResponse =
+                    restTemplate.exchange("http://session:8080/sessions",
+                            HttpMethod.GET, null, new ParameterizedTypeReference<List<SessionMessage>>() {
+                            });
+            System.out.println("Code: " + rateResponse.getStatusCodeValue());
+            List<SessionMessage> Response = rateResponse.getBody();
+            System.out.println("There are " + Response.size() + " messages. Neat.");
+            for (SessionMessage message2 : Response) {
+                System.out.println("Content: " + message2.getTimestamp() + " - " + message2.getUsername() + " - " + message2.getGateway());
+            }
+            Gson builder = new GsonBuilder().setPrettyPrinting().create();
+            String jsonStr = builder.toJson(Response);
+            conn.send(jsonStr);
+        } catch (Exception ex) {
+            System.out.println("hi");
+        }
     }
 
     @Override

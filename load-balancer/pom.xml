@@ -14,7 +14,7 @@
     </parent>
 
     <properties>
-        <main.class>service.balancer.client.Application</main.class>
+        <main.class>service.balancer.Application</main.class>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>

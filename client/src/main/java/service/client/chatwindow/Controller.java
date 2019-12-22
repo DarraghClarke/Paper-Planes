@@ -1,5 +1,10 @@
 package service.client.chatwindow;
 
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,6 +17,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import message.Message;
+import message.SessionMessage;
 import service.client.messages.bubble.BubbleSpec;
 import service.client.messages.bubble.BubbledLabel;
 
@@ -19,6 +25,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 
@@ -87,6 +95,17 @@ public class Controller implements Initializable {
             thread2.setDaemon(true);
             thread2.start();
         }
+    }
+
+    public void setOnline(ArrayList<SessionMessage> allUsers) {
+        Platform.runLater(() -> {
+            ObservableList<SessionMessage> users = FXCollections.observableList(allUsers);
+            userList.setItems(users);
+            userList.setCellFactory(new CellRenderer());
+            userList.getSelectionModel().selectedItemProperty().addListener((ChangeListener<SessionMessage>)
+                    (observable, oldValue, newValue) -> System.out.println("Selected item: " + newValue.getUsername()));
+        });
+
     }
 
     public void setUsername(String username) {

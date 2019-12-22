@@ -1,11 +1,16 @@
 package service.client.chatwindow;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import message.SessionMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import service.client.login.LoginController;
@@ -40,8 +45,16 @@ public class Client extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         Gson gson = new Gson();
-        Message msg = gson.fromJson(message, Message.class);
-        controller.addToChat(msg);
+        //this is meant to be a logic to sort different types of messages, though for testing right now it only takes the user lists
+//        if (message.contains("message")){
+//            Message msg = gson.fromJson(message, Message.class);
+//            controller.addToChat(msg);
+//        }// else if (message.contains("sessionMessage")){
+        Type collectionType = new TypeToken<ArrayList<SessionMessage>>(){}.getType();
+            ArrayList<SessionMessage> msg = (ArrayList<SessionMessage>) gson.fromJson( message , collectionType);
+            System.out.println("wow?");
+            controller.setOnline(msg);
+        //}
     }
 
     @Override
@@ -50,7 +63,7 @@ public class Client extends WebSocketClient {
     }
 
 
-    public void sendMessage(String msg) throws IOException {
+    public void sendMessage(String msg) {
         Message createMessage = new Message();
         createMessage.setSender(username);
         createMessage.setTime(Instant.now());
