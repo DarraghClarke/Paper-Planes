@@ -25,8 +25,6 @@ import javax.jms.*;
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#server-example
 
 public class ChatEndpoint extends WebSocketServer {
-    MessageProducer producer;
-    Session session;
 
     public ChatEndpoint(InetSocketAddress address) {
         super(address);
@@ -49,12 +47,25 @@ public class ChatEndpoint extends WebSocketServer {
         Message msg = gson.fromJson(message, Message.class);
         System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
 
-//        try {
-//            SessionMessage sessionMessage = new SessionMessage(msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString());
-//            producer.send(session.createObjectMessage(sessionMessage));
-//        } catch (JMSException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
+            Connection connection = factory.createConnection();
+            connection.setClientID("gateway");
+            Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
+            connection.start();
+
+            SessionMessage sessionMessage = new SessionMessage(msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString());
+
+            Queue requestsQueue = session.createQueue("SESSIONS");
+            MessageProducer producer = session.createProducer(requestsQueue);
+            producer.send(session.createObjectMessage(sessionMessage));
+
+            producer.close();
+            session.close();
+            connection.close();
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
 
         //sample code
 //        Message Response = new Message();
@@ -64,36 +75,36 @@ public class ChatEndpoint extends WebSocketServer {
 //        Response.setTime(Instant.now());
         // long timestamp, String username, String gateway
 //
-        List<SessionMessage> Response = new ArrayList<>();
-        Response.add(new SessionMessage(19l,"big Tom","this gateway idk"));
-        Response.add(new SessionMessage(29l,"GIT","this gateway idk"));
-//        try {
+//        List<SessionMessage> Response = new ArrayList<>();
+//        Response.add(new SessionMessage(19l,"big Tom","this gateway idk"));
+//        Response.add(new SessionMessage(29l,"GIT","this gateway idk"));
+        try {
 //            SessionMessage sessionMessage = new SessionMessage(Instant.now().getEpochSecond(), "oisinq-baby", InetAddress.getLocalHost().toString()); // (msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString()
 //            System.out.println("Sending message...");
 //            producer.send(session.createObjectMessage(sessionMessage));
 //            System.out.println("sent message");
-//
-//            Thread.sleep(3000);
-//
-//            System.out.println("rest time...");
-//            RestTemplate restTemplate = new RestTemplate();
-//
-//            ResponseEntity<List<SessionMessage>> rateResponse =
-//                    restTemplate.exchange("http://session:8080/sessions",
-//                            HttpMethod.GET, null, new ParameterizedTypeReference<List<SessionMessage>>() {
-//                            });
-//            System.out.println("Code: " + rateResponse.getStatusCodeValue());
-//            List<SessionMessage> Response = rateResponse.getBody();
-//            System.out.println("There are " + Response.size() + " messages. Neat.");
-//            for (SessionMessage message2 : Response) {
-//                System.out.println("Content: " + message2.getTimestamp() + " - " + message2.getUsername() + " - " + message2.getGateway());
-//            }
+
+            Thread.sleep(3000);
+
+            System.out.println("rest time...");
+            RestTemplate restTemplate = new RestTemplate();
+
+            ResponseEntity<List<SessionMessage>> rateResponse =
+                    restTemplate.exchange("http://session:8080/sessions",
+                            HttpMethod.GET, null, new ParameterizedTypeReference<List<SessionMessage>>() {
+                            });
+            System.out.println("Code: " + rateResponse.getStatusCodeValue());
+            List<SessionMessage> response = rateResponse.getBody();
+            System.out.println("There are " + response.size() + " messages. Neat.");
+            for (SessionMessage message2 : response) {
+                System.out.println("Content: " + message2.getTimestamp() + " - " + message2.getUsername() + " - " + message2.getGateway());
+            }
             Gson builder = new GsonBuilder().setPrettyPrinting().create();
-            String jsonStr = builder.toJson(Response);
+            String jsonStr = builder.toJson(response);
             conn.send(jsonStr);
-//        } catch (Exception ex) {
-//            System.out.println("hi");
-//        }
+        } catch (Exception ex) {
+            System.out.println("hi");
+        }
     }
 
     @Override
@@ -113,22 +124,7 @@ public class ChatEndpoint extends WebSocketServer {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        System.out.print("server started successfully");
-
-        String host = "localhost";
-
-//        try {
-//            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://" + host + ":61616");
-//            Connection connection = factory.createConnection();
-//            connection.setClientID("sessions");
-//            session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
-//            connection.start();
-//
-//            Queue requestsQueue = session.createQueue("SESSIONS");
-//            producer = session.createProducer(requestsQueue);
-//        } catch (JMSException e) {
-//            e.printStackTrace();
-//        }
+        System.out.println("server started successfully");
     }
 
     public void connectToLoadBalancer() throws UnknownHostException {
@@ -136,20 +132,21 @@ public class ChatEndpoint extends WebSocketServer {
         String gatewayAddress = getAddress().getHostString() + ":" + getAddress().getPort();
         HttpEntity<String> request = new HttpEntity<>(gatewayAddress);
 
-//        try {
-//            Thread.sleep(20000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            Thread.sleep(7000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-    //    restTemplate.postForObject("http://192.168.99.100:8081/addGateway", request, String.class);
+       restTemplate.postForObject("http://load-balancer:8081/addGateway", request, String.class);
+        System.out.println("I've posted! go me!");
     }
 
     public static void main(String[] args) throws UnknownHostException {
         String host = Inet4Address.getLocalHost().getHostAddress();
         int port = 8080;
 
-        System.out.println("waited");
+        System.out.println("waiting");
         WebSocketServer server = new ChatEndpoint(new InetSocketAddress(host, port));
         server.run();
     }
