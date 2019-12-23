@@ -133,7 +133,7 @@ public class ChatEndpoint extends WebSocketServer {
         HttpEntity<String> request = new HttpEntity<>(gatewayAddress);
 
         try {
-            Thread.sleep(7000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
