@@ -10,6 +10,8 @@ import org.bson.Document;
 
 import javax.jms.*;
 
+import static com.mongodb.client.model.Filters.eq;
+
 /**
  * Thread for handling applications from the RESPONSES queue
  */
@@ -47,12 +49,13 @@ public class ReceivingSessionsThread implements Runnable {
                     if (content instanceof SessionMessage) {
                         SessionMessage response = (SessionMessage) content;
 
-                        SessionMessage existingSession = collection.find(new Document().append("username", response.getUsername())).first();
+                        SessionMessage existingSession = collection.find(eq("username", response.getUsername())).first();
 
                         if (existingSession == null) {
                             collection.insertOne(response);
                         } else {
-                            collection.updateOne(new Document().append("username", response.getUsername()), new Document().append("timestamp", response.getTimestamp()));
+                            collection.updateOne(eq("username", response.getUsername()),
+                                    new Document("timestamp", response.getTimestamp()));
                         }
                     }
 
