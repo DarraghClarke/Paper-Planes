@@ -1,15 +1,15 @@
 version: "3"
 
 services:
-#  client:
-#    build: client
-#    #image: "client:latest"
-#    depends_on:
-#      - gateway
-#  gateway:
-#    build: gateway
-#    ports:
-#      - "8080:8080"
+  client:
+    build: client
+    image: "client:latest"
+    depends_on:
+      - gateway
+  gateway:
+    build: gateway
+    ports:
+      - "8080:8080"
   session:
     build: session
     depends_on:

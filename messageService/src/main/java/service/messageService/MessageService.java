@@ -4,6 +4,7 @@ import message.Message;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import service.gateway.ChatEndpoint;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -17,9 +18,6 @@ public class MessageService {
 
     public List<Message> getMessages(List<Message> mesagesList){
 
-
-
-
         return messages;
     }
 
@@ -28,9 +26,9 @@ public class MessageService {
     }
 
     @GetMapping("/getGateway")
-    public String getGateway() {
-        //this just returns the first gateway  currently
-        return gateways.get(0).toString();
+    public ChatEndpoint getGateway() {
+        ChatEndpoint gateway = new ChatEndpoint();
+        return gateway;
     }
 
     @PostMapping("/addGateway")
@@ -39,9 +37,9 @@ public class MessageService {
         gateways.add(gatewayInfo);
         System.out.println("added IP address " + gatewayInfo);
     }
-
-    public static void main(String[] args) {
-
-    }
+//
+//    public static void main(String[] args) {
+//
+//    }
 
 }
