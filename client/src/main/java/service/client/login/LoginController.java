@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -47,7 +48,7 @@ public class LoginController implements Initializable {
         //this gets the gateway from the load balancer
         RestTemplate restTemplate = new RestTemplate();
         String temp = restTemplate.getForObject("http://localhost:8081/getGateway", String.class);
-        Client client = new Client(new URI("ws://" + temp + "/"), username, controller);
+        Client client = new Client(new URI("ws://localhost:8080/"), username, controller);
         Thread x = new Thread(client);
         x.start();
     }
