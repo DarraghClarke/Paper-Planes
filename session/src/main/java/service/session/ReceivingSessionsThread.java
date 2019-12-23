@@ -55,7 +55,7 @@ public class ReceivingSessionsThread implements Runnable {
                             collection.insertOne(response);
                         } else {
                             collection.updateOne(eq("username", response.getUsername()),
-                                    new Document("timestamp", response.getTimestamp()));
+                                    new Document("$set", new Document("timestamp", response.getTimestamp())));
                         }
                     }
 
