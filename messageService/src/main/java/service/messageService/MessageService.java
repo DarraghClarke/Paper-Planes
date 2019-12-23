@@ -1,9 +1,9 @@
 package service.messageService;
 
+import message.Message;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import service.core.Message;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -15,12 +15,10 @@ public class MessageService {
 
 
 
-    public List<Message> getMessages(List<String> gateways){
+    public List<Message> getMessages(List<Message> mesagesList){
 
-        for(String gateway:gateways){
-            Message message = new Message(gateway,gateway, gateway);
-            messages.add(message);
-        }
+
+
 
         return messages;
     }

@@ -5,6 +5,7 @@
       <list>
         <option value="$PROJECT_DIR$/messageService/pom.xml" />
         <option value="$PROJECT_DIR$/core/pom.xml" />
+        <option value="$PROJECT_DIR$/client/pom.xml" />
       </list>
     </option>
   </component>
