@@ -3,9 +3,13 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Paper-Planes.iml" filepath="$PROJECT_DIR$/.idea/Paper-Planes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/load-balancer/balancer.iml" filepath="$PROJECT_DIR$/load-balancer/balancer.iml" />
       <module fileurl="file://$PROJECT_DIR$/client/client.iml" filepath="$PROJECT_DIR$/client/client.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gateway/gateway.iml" filepath="$PROJECT_DIR$/gateway/gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/messageService/messageService.iml" filepath="$PROJECT_DIR$/messageService/messageService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/session/session.iml" filepath="$PROJECT_DIR$/session/session.iml" />
+      <module fileurl="file://$PROJECT_DIR$/session-test-client/session-test-client.iml" filepath="$PROJECT_DIR$/session-test-client/session-test-client.iml" />
     </modules>
   </component>
 </project>
