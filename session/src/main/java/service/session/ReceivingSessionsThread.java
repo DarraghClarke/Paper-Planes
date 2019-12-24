@@ -6,8 +6,11 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import message.SessionMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.bson.Document;
 
 import javax.jms.*;
+
+import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Thread for handling applications from the RESPONSES queue
@@ -45,7 +48,15 @@ public class ReceivingSessionsThread implements Runnable {
                     Object content = ((ObjectMessage) message).getObject();
                     if (content instanceof SessionMessage) {
                         SessionMessage response = (SessionMessage) content;
-                        collection.insertOne(response);
+
+                        SessionMessage existingSession = collection.find(eq("username", response.getUsername())).first();
+
+                        if (existingSession == null) {
+                            collection.insertOne(response);
+                        } else {
+                            collection.updateOne(eq("username", response.getUsername()),
+                                    new Document("$set", new Document("timestamp", response.getTimestamp())));
+                        }
                     }
 
                     // Finally, we acknowledge the message

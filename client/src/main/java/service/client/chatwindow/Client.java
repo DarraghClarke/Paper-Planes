@@ -46,15 +46,15 @@ public class Client extends WebSocketClient {
     public void onMessage(String message) {
         Gson gson = new Gson();
         //this is meant to be a logic to sort different types of messages, though for testing right now it only takes the user lists
-//        if (message.contains("message")){
-//            Message msg = gson.fromJson(message, Message.class);
-//            controller.addToChat(msg);
-//        }// else if (message.contains("sessionMessage")){
+        if (message.contains("\"sender\":")){//element unique to message tyoe
+            Message msg = gson.fromJson(message, Message.class);
+            controller.addToChat(msg);
+        } else if (message.contains("\"gateway\":")){//element unique to session type
         Type collectionType = new TypeToken<ArrayList<SessionMessage>>(){}.getType();
             ArrayList<SessionMessage> msg = (ArrayList<SessionMessage>) gson.fromJson( message , collectionType);
             System.out.println("wow?");
             controller.setOnline(msg);
-        //}
+        }
     }
 
     @Override
