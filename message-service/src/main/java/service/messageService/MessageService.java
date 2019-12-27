@@ -25,11 +25,12 @@ public class MessageService {
     public static List<String> getReceiver(List<Message> messages){
         for( Message message : messages){
             gatewayList.add(message.getReciever());
-            System.out.println(message.getReciever());
+            System.out.println("Message Received: " + message.getReciever());
         }
         return gatewayList;
     }
 
+    //forward messages to the correct gateway
     public static void forwardMessages(List<Message> messages){
         for( Message message : messages){
 

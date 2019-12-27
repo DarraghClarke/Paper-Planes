@@ -18,29 +18,34 @@ public class Receiver {
             System.out.println("Starting Receiver on: " + host);
 
             try {
+
                 ConnectionFactory factory =
                         new ActiveMQConnectionFactory("failover://tcp://" + host + ":61616");
                 Connection connection = factory.createConnection();
                 connection.setClientID("receiver");
                 Session session = connection.createSession(false,
                         Session.CLIENT_ACKNOWLEDGE);
+
+                connection.start();
                 Queue queue = session.createQueue("MESSAGES");
                 MessageConsumer consumer = session.createConsumer(queue);
 
-
-                connection.start();
+                System.out.println("Connection Started");
                 while (true) {
                     Message message = consumer.receive();
-                    if (message instanceof message.Message) {
-                        System.out.println(((message.Message) message).getMessage());
-                        messageList.add((message.Message) message);
-
+                    if (message instanceof ObjectMessage) {
+                        Object content = ((ObjectMessage) message).getObject();
+                        if (content instanceof message.Message) {
+                            message.Message response = (message.Message) content;
+                            System.out.println((response));
+                            messageList.add((message.Message) message);
+                        }
                     } else {
                         System.out.println("Unknown message type: " + message.getClass().getCanonicalName());
                     }
 
 
-                    connection.close();
+
                 }
             } catch (JMSException e) {
                 e.printStackTrace();

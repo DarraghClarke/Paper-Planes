@@ -12,6 +12,7 @@ public class Launcher extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("views/LoginView.fxml")));
         primaryStage.setTitle("Paper Planes");
         Scene mainScene = new Scene(root, 500, 400);

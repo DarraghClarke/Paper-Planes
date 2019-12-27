@@ -64,7 +64,7 @@ public class ReceivingSessionsThread implements Runnable {
 
                     FindIterable<SessionMessage> cursor = collection.find();
 
-                    System.out.println("Status update:\nWe've got: " + collection.count());
+                    System.out.println("Status update:\nWe've got: " + collection);
 
                     for (SessionMessage sessionMessage : cursor) {
                         System.out.println(sessionMessage.getUsername() + " - " + sessionMessage.getGateway()

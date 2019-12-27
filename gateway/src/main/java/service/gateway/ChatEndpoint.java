@@ -1,14 +1,6 @@
 package service.gateway;
 
-<<<<<<< HEAD
-=======
-import java.net.*;
-import java.nio.ByteBuffer;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
->>>>>>> master
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import message.Message;
@@ -139,22 +131,14 @@ public class ChatEndpoint extends WebSocketServer {
         RestTemplate restTemplate = new RestTemplate();
         String gatewayAddress = getAddress().getHostString() + ":" + getAddress().getPort();
         HttpEntity<String> request = new HttpEntity<>(gatewayAddress);
-
         try {
-<<<<<<< HEAD
             Thread.sleep(20000);
-=======
-            Thread.sleep(10000);
->>>>>>> master
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-<<<<<<< HEAD
         restTemplate.postForObject("http://load-balancer:8081/addGateway", request, String.class);
-=======
-       restTemplate.postForObject("http://load-balancer:8081/addGateway", request, String.class);
->>>>>>> master
+
         System.out.println("I've posted! go me!");
     }
 
