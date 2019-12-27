@@ -10,7 +10,7 @@
         <module name="client" />
         <module name="core" />
         <module name="gateway" />
-        <module name="messageService" />
+        <module name="message-service" />
         <module name="session" />
         <module name="session-test-client" />
       </profile>
@@ -20,7 +20,7 @@
       <module name="client" target="1.8" />
       <module name="core" target="1.8" />
       <module name="gateway" target="1.8" />
-      <module name="messageService" target="1.8" />
+      <module name="message-service" target="1.8" />
       <module name="session" target="1.8" />
       <module name="session-test-client" target="1.8" />
     </bytecodeTargetLevel>

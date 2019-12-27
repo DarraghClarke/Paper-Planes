@@ -1,8 +1,5 @@
 package service.client.login;
 
-import org.springframework.web.client.RestTemplate;
-import service.client.chatwindow.Controller;
-import service.client.chatwindow.Client;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +9,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-
+import service.client.chatwindow.Client;
+import service.client.chatwindow.Controller;
 
 import java.io.IOException;
 import java.net.URI;
@@ -45,9 +43,9 @@ public class LoginController implements Initializable {
         this.scene = new Scene(window);
 
         //this gets the gateway from the load balancer
-        RestTemplate restTemplate = new RestTemplate();
-        String temp = restTemplate.getForObject("http://localhost:8081/getGateway", String.class);
-        Client client = new Client(new URI("ws://" + temp + "/"), username, controller);
+//        RestTemplate restTemplate = new RestTemplate();
+//        String temp = restTemplate.getForObject("http://localhost:8081/getGateway", String.class);
+        Client client = new Client(new URI("ws://localhost:8080/"), username, controller);
         Thread x = new Thread(client);
         x.start();
     }
