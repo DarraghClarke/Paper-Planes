@@ -6,45 +6,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageService {
-    List messages = new ArrayList<Message>();
+   public static List<Message>  messageList = new ArrayList<>();
+   public static List<String>  gatewayList = new ArrayList<>();
 
-
-    public MessageService(List<Message> receivedMessages) throws InterruptedException {
-        Receiver receiver = new Receiver();
-        receiver.recieveMessages();
-        //access db and forward
-
+    public MessageService() {
 
     }
 
+    public static void main(String[] args) throws InterruptedException {
+        Receiver receiver = new Receiver();
+        messageList = receiver.recieveMessages();
+        //access db and forward
+        getReceiver(messageList);
+        forwardMessages(messageList);
 
+    }
 
+    public static List<String> getReceiver(List<Message> messages){
+        for( Message message : messages){
+            gatewayList.add(message.getReciever());
+            System.out.println(message.getReciever());
+        }
+        return gatewayList;
+    }
 
+    public static void forwardMessages(List<Message> messages){
+        for( Message message : messages){
 
-
-
-//    public List<Message> getMessages(List<Message> mesagesList){
-//
-//        return messages;
-//    }
-//
-//    public void sendMessage(){
-//
-//    }
-
-//    @GetMapping("/getGateway")
-//    public ChatEndpoint getGateway() {
-//        ChatEndpoint gateway = new ChatEndpoint();
-//        return gateway;
-//    }
-//
-//    @PostMapping("/addGateway")
-//    public void addGateway(@RequestBody String gatewayInfo) throws MalformedURLException {
-//
-//        gateways.add(gatewayInfo);
-//        System.out.println("added IP address " + gatewayInfo);
-//    }
-//
+        }
+    }
 
 
 }
