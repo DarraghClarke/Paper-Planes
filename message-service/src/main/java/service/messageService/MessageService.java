@@ -97,9 +97,8 @@ public class MessageService {
             MessageProducer producer = session.createProducer(requestsQueue);
 
             //CONNECT TO THE CORRECT GATEWAY
-
+            // websockets
             
-
 
             producer.send((javax.jms.Message) message);
             System.out.println("sent message");
