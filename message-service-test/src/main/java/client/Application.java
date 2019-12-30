@@ -1,4 +1,4 @@
-package main.java.client;
+package client;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -23,11 +23,11 @@ public class Application {
             ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://" + host + ":61616");
             Connection connection = factory.createConnection();
             connection.setClientID("test-client");
-            Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-            connection.start();
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
             System.out.println("connected!");
 
-            Queue requestsQueue = session.createQueue("MESSAGES");
+            Queue requestsQueue = session.createQueue("MESSAGESQUEUE");
 
             System.out.println("Queue created");
             MessageProducer producer = session.createProducer(requestsQueue);
