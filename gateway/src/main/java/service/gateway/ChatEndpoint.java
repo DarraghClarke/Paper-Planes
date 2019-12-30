@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.jms.*;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -54,7 +55,7 @@ public class ChatEndpoint extends WebSocketServer {
             Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
             connection.start();
 
-            SessionMessage sessionMessage = new SessionMessage(msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString());
+            SessionMessage sessionMessage = new SessionMessage(msg.getTime().getEpochSecond(), msg.getSender(), InetAddress.getLocalHost().getHostName());
 
             Queue requestsQueue = session.createQueue("SESSIONS");
             MessageProducer producer = session.createProducer(requestsQueue);
@@ -63,7 +64,7 @@ public class ChatEndpoint extends WebSocketServer {
             producer.close();
             session.close();
             connection.close();
-        } catch (JMSException e) {
+        } catch (JMSException | UnknownHostException e) {
             e.printStackTrace();
         }
 

@@ -2,8 +2,13 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 .idea
+*/.idea
 
+target
 */target/
+
+*.iml
+*/*.iml
 
 # User-specific stuff
 .idea/**/workspace.xml
