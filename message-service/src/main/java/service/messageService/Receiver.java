@@ -16,7 +16,7 @@ public class Receiver {
                 host = args[0];
             }
             System.out.println("Starting Receiver on: " + host);
-
+                host = "activemq";
             try {
 
                 ConnectionFactory factory =
@@ -26,25 +26,26 @@ public class Receiver {
                 Session session = connection.createSession(false,
                         Session.CLIENT_ACKNOWLEDGE);
 
-                connection.start();
-                Queue queue = session.createQueue("MESSAGES");
-                MessageConsumer consumer = session.createConsumer(queue);
 
                 System.out.println("Connection Started");
+                Queue queue = session.createQueue("MESSAGES");
+                MessageConsumer consumer = session.createConsumer(queue);
+                connection.start();
+
                 while (true) {
-                    Message message = consumer.receive();
+               Message message = consumer.receive();
                     if (message instanceof ObjectMessage) {
                         Object content = ((ObjectMessage) message).getObject();
                         if (content instanceof message.Message) {
                             message.Message response = (message.Message) content;
                             System.out.println((response));
                             messageList.add((message.Message) message);
+                            message.acknowledge();
+
                         }
                     } else {
                         System.out.println("Unknown message type: " + message.getClass().getCanonicalName());
                     }
-
-
 
                 }
             } catch (JMSException e) {

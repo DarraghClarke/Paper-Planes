@@ -80,7 +80,7 @@ public class ChatEndpoint extends WebSocketServer {
 //        Response.add(new SessionMessage(19l,"big Tom","this gateway idk"));
 //        Response.add(new SessionMessage(29l,"GIT","this gateway idk"));
         try {
-//            SessionMessage sessionMessage = new SessionMessage(Instant.now().getEpochSecond(), "oisinq-baby", InetAddress.getLocalHost().toString()); // (msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString()
+//            SessionMessage sessionMessage = new SessionMessage(Instant.now().getEpochSecond(), "oisinq-baby", InetAddress.getLocalHost().getHostAddress()); // (msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString()
 //            System.out.println("Sending message...");
 //            producer.send(session.createObjectMessage(sessionMessage));
 //            System.out.println("sent message");
