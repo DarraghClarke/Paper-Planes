@@ -2,15 +2,13 @@ package service.client.chatwindow;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import message.*;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import service.client.login.LoginController;
 
-import java.lang.reflect.Type;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#client-example
@@ -53,7 +51,6 @@ public class Client extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        Gson gson = new Gson();
         //this is meant to be a logic to sort different types of messages
 //        if (message.contains("\"sentBy\":")){//element unique to userMessage tyoe
 //            UserMessage msg = gson.fromJson(message, UserMessage.class);
@@ -64,6 +61,18 @@ public class Client extends WebSocketClient {
 //            System.out.println("wow?");
 //            controller.setOnline(msg);
 //        }
+
+        RuntimeTypeAdapterFactory<Message> adapter = RuntimeTypeAdapterFactory
+                .of(message.Message.class, "type")
+                .registerSubtype(SessionMessage.class, Message.MessageTypes.SESSION_MESSAGE)
+                .registerSubtype(UserMessage.class, Message.MessageTypes.USER_MESSAGE)
+                .registerSubtype(ChatLogRequest.class, Message.MessageTypes.CHAT_LOG_REQUEST)
+                .registerSubtype(ListOfUserMessages.class, Message.MessageTypes.LIST_OF_USER_MESSAGES)
+                .registerSubtype(ListOfSessionMessages.class, Message.MessageTypes.LIST_OF_SESSION_MESSAGES);
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(adapter).create();
+
+        System.out.println("new message: " + message);
         message.Message messageObj = gson.fromJson(message, message.Message.class);
 
 
@@ -78,7 +87,7 @@ public class Client extends WebSocketClient {
                 controller.setOnline(onlineStatus);
                 break;
             case Message.MessageTypes.LIST_OF_USER_MESSAGES:
-                ListOfUserMessage chatHistory = (ListOfUserMessage) messageObj;
+                ListOfUserMessages chatHistory = (ListOfUserMessages) messageObj;
                 List<UserMessage> historyMessageList= chatHistory.getMessageList();
 
                 for(UserMessage messages: historyMessageList){

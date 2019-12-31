@@ -55,7 +55,9 @@ public class ChatEndpoint extends WebSocketServer {
                 .of(message.Message.class, "type")
                 .registerSubtype(SessionMessage.class, Message.MessageTypes.SESSION_MESSAGE)
                 .registerSubtype(UserMessage.class, Message.MessageTypes.USER_MESSAGE)
-                .registerSubtype(ChatLogRequest.class, Message.MessageTypes.CHAT_LOG_REQUEST);
+                .registerSubtype(ChatLogRequest.class, Message.MessageTypes.CHAT_LOG_REQUEST)
+                .registerSubtype(ListOfUserMessages.class, Message.MessageTypes.LIST_OF_USER_MESSAGES)
+                .registerSubtype(ListOfSessionMessages.class, Message.MessageTypes.LIST_OF_SESSION_MESSAGES);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(adapter).create();
 
