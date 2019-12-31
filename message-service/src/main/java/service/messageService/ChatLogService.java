@@ -1,9 +1,7 @@
 package service.messageService;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import message.ChatMessage;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,30 +11,29 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * ChatLogService – REST Controller for providing access to historical chat messages
+ */
 @RestController
 public class ChatLogService {
     private MongoCollection<ChatMessage> collection;
 
     public ChatLogService() {
-        try {
-            MongoClient mongoClient = SingletonMongoClient.getInstance();
-            MongoDatabase database = mongoClient.getDatabase("paper-planes");
-            collection = database.getCollection("messages", ChatMessage.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // We access the collection for storing messages in the Mongo database
+        collection = SingletonMongoCollection.getInstance();
     }
 
+    /**
+     * Endpoint for retrieving the chat history between two users (the order doesn't matter)
+     */
     @GetMapping(value="history")
     public List<ChatMessage> getChatLog(@RequestParam String sender, @RequestParam String receiver) {
-        System.out.println("Sender is " + sender + ", receiver is " + receiver);
-        System.out.println("We've got " + collection.countDocuments() + " documents. Cool.");
 
         List<ChatMessage> result = collection.find(new BasicDBObject().append("sentTo", receiver).append("sentBy", sender)).into(new ArrayList<>());
         result.addAll(collection.find(new BasicDBObject().append("sentTo", sender).append("sentBy", receiver)).into(new ArrayList<>()));
 
+        // Since the ChatMessages are comparable, we can sort them easily.
         Collections.sort(result);
-        System.out.println("We've got " + result.size() + " results...");
         return result;
     }
 }
