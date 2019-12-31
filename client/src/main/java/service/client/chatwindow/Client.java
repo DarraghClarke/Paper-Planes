@@ -79,7 +79,9 @@ public class Client extends WebSocketClient {
             case Message.MessageTypes.LIST_OF_SESSION_MESSAGES:
                 ListOfSessionMessages onlineStatus = (ListOfSessionMessages) messageObj;
                 System.out.println("wow?");
-                controller.setOnline(onlineStatus);
+                if (onlineStatus.getMessageList().size()>0){
+                    controller.setOnline(onlineStatus);
+                }
                 break;
             case Message.MessageTypes.LIST_OF_USER_MESSAGES:
                 ListOfChatMessages chatHistory = (ListOfChatMessages) messageObj;
