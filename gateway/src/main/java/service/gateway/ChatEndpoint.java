@@ -15,13 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import java.net.Inet4Address;
+import javax.jms.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -180,7 +174,7 @@ public class ChatEndpoint extends WebSocketServer {
             // Set up the connection and session
             ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
             Connection connection = factory.createConnection();
-            connection.setClientID("gateway");
+            connection.setClientID("gateway-chat");
             Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
             connection.start();
 
@@ -226,7 +220,7 @@ public class ChatEndpoint extends WebSocketServer {
             // Creates the connection and session for the queueing system
             ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
             Connection connection = factory.createConnection();
-            connection.setClientID("gateway");
+            connection.setClientID("gateway-session");
             Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
             connection.start();
 
