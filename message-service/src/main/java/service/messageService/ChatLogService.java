@@ -20,7 +20,7 @@ public class ChatLogService {
     public ChatLogService() {
         try {
             MongoClient mongoClient = SingletonMongoClient.getInstance();
-            MongoDatabase database = mongoClient.getDatabase("messages");
+            MongoDatabase database = mongoClient.getDatabase("paper-planes");
             collection = database.getCollection("messages", UserMessage.class);
         } catch (Exception e) {
             e.printStackTrace();
@@ -29,10 +29,14 @@ public class ChatLogService {
 
     @GetMapping(value="history")
     public List<UserMessage> getChatLog(@RequestParam String sender, @RequestParam String receiver) {
-        List<UserMessage> result = collection.find(new BasicDBObject().append("sendTo", sender).append("sendFrom", receiver)).into(new ArrayList<>());
-        result.addAll(collection.find(new BasicDBObject().append("sendTo", receiver).append("sendFrom", sender)).into(new ArrayList<>()));
+        System.out.println("Sender is " + sender + ", receiver is " + receiver);
+        System.out.println("We've got " + collection.countDocuments() + " documents. Cool.");
+
+        List<UserMessage> result = collection.find(new BasicDBObject().append("sentTo", receiver).append("sentBy", sender)).into(new ArrayList<>());
+        result.addAll(collection.find(new BasicDBObject().append("sentTo", sender).append("sentBy", receiver)).into(new ArrayList<>()));
 
         Collections.sort(result);
+        System.out.println("We've got " + result.size() + " results...");
         return result;
     }
 }

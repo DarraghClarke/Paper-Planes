@@ -46,7 +46,7 @@ public class ReceivingMessagesThread implements Runnable {
             System.out.println("Connection Started");
 
 
-            MongoDatabase database = mongoClient.getDatabase("messages");
+            MongoDatabase database = mongoClient.getDatabase("paper-planes");
             MongoCollection<UserMessage> collection = database.getCollection("messages", UserMessage.class);
 
             while (true) {
