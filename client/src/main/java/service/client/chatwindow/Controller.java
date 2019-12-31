@@ -18,9 +18,8 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import message.ListOfSessionMessages;
 import message.ChatMessage;
+import message.ListOfSessionMessages;
 import message.SessionMessage;
 import service.client.messages.bubble.BubbleSpec;
 import service.client.messages.bubble.BubbledLabel;
@@ -182,5 +181,9 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+    }
+
+    public int numberOfMessages() {
+        return chatPane.getItems().size();
     }
 }

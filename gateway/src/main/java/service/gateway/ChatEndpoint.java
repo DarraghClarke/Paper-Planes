@@ -52,7 +52,7 @@ public class ChatEndpoint extends WebSocketServer {
         // Since we are using Docker Compose, we need to wait for the load-balancer to come online. This might need tuning
         // on your individual system.
         try {
-            Thread.sleep(12000);
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

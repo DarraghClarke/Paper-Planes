@@ -74,7 +74,9 @@ public class Client extends WebSocketClient {
         switch (messageObj.getType()) {
             case Message.MessageTypes.USER_MESSAGE:
                 ChatMessage chatMessage = (ChatMessage) messageObj;
-                controller.addToChat(chatMessage);
+                if (chatMessage.getSentBy().equals(userSelected)) {
+                    controller.addToChat(chatMessage);
+                }
                 break;
             case Message.MessageTypes.LIST_OF_SESSION_MESSAGES:
                 ListOfSessionMessages onlineStatus = (ListOfSessionMessages) messageObj;
@@ -93,7 +95,7 @@ public class Client extends WebSocketClient {
                     cache.remove(userSelected);
                     cache.put(userSelected, chatHistory);
                 }
-                if(userSelected== chatHistory.getChatLogRequest().getRequestedUser()) {
+                if(userSelected.equals(chatHistory.getChatLogRequest().getRequestedUser()) && controller.numberOfMessages() == 0) {
                     for (ChatMessage messages : historyMessageList) {
                         System.out.println("test");
                         controller.addToChat(messages);
@@ -116,7 +118,7 @@ public class Client extends WebSocketClient {
         createChatMessage.setTimestamp(Instant.now().getEpochSecond());
         createChatMessage.setMessage(msg);
         createChatMessage.setSentTo(userSelected);
-        //controller.addToChat(createChatMessage);//this makes the message appear for the user in the chat panel
+        controller.addToChat(createChatMessage);//this makes the message appear for the user in the chat panel
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -135,13 +137,12 @@ public class Client extends WebSocketClient {
         System.out.println("sent");
         send(jsonStr);
 
-        if(cache.containsKey(username)) {
-            ListOfChatMessages cachedChat = cache.get(selectedUser);
-            for (ChatMessage messages : cachedChat.getMessageList()) {
-                System.out.println("cached verstions");
-                controller.addToChat(messages);
-            }
-        }
-
+//        if(cache.containsKey(username)) {
+//            ListOfChatMessages cachedChat = cache.get(selectedUser);
+//            for (ChatMessage messages : cachedChat.getMessageList()) {
+//                System.out.println("cached verstions");
+//                controller.addToChat(messages);
+//            }
+//        }
     }
 }
