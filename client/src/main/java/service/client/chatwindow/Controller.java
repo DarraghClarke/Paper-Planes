@@ -65,7 +65,7 @@ public class Controller implements Initializable {
                 label.setText(msg.getMessage());
                 label.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, null, null)));
                 label.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
-                Long time =msg.getTimestamp();
+                Long time = msg.getTimestamp();
                 hBox.getChildren().addAll(new Label(msg.getSentBy()), label, new Label(time.toString()));//todo check time label
                 return hBox;
             }
@@ -83,7 +83,7 @@ public class Controller implements Initializable {
                 label.setText(msg.getMessage());
                 label.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, null, null)));
                 label.setBubbleSpec(BubbleSpec.FACE_RIGHT_CENTER);
-                Long time =msg.getTimestamp();
+                Long time = msg.getTimestamp();
                 hBox.getChildren().addAll(new Label(time.toString()), label, new Label(msg.getSentBy()));//todo check time label
                 return hBox;
             }
@@ -101,10 +101,10 @@ public class Controller implements Initializable {
         }
     }
 
-    public void setUserInfo(SessionMessage user){
+    public void setUserInfo(SessionMessage user) {
         if (System.currentTimeMillis() / 1000l - user.getTimestamp() > 60) {//i think this means last minute online
-            userInfo.setText(user.getUsername() + "-Last online: " + (System.currentTimeMillis() / 1000l - user.getTimestamp())/60 + " minutes ago");
-        } else{
+            userInfo.setText(user.getUsername() + "-Last online: " + (System.currentTimeMillis() / 1000l - user.getTimestamp()) / 60 + " minutes ago");
+        } else {
             userInfo.setText(user.getUsername() + "-Online Now");
         }
     }
@@ -112,27 +112,40 @@ public class Controller implements Initializable {
     public void setOnline(ListOfSessionMessages allUsers) {
         Platform.runLater(() -> {
             ObservableList<SessionMessage> users = FXCollections.observableList(allUsers.getMessageList());
+            int selectedIndex = userList.getSelectionModel().getSelectedIndex();
             userList.getItems().clear();
             userList.setItems(users);
+            userList.getSelectionModel().select(selectedIndex);
             userList.setCellFactory(new CellRenderer());
             userList.getSelectionModel().selectedItemProperty().addListener((ChangeListener<SessionMessage>)
                     (observable, oldValue, newValue) -> {
-                if(newValue!= null && newValue.getUsername() != oldValue.getUsername()) {
-                    inputBox.clear();
-                    inputBox.editableProperty().setValue(true);
-                    inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
-                    System.out.println("Selected item: " + newValue.getUsername());
-                    client.setSelectedUserChatHistory(newValue.getUsername());
-                    setUserInfo(newValue);
-                    client.setUserSelection(newValue.getUsername());
-                    chatPane.getItems().clear();
-                }
+                    if(oldValue !=null) {
+                        if (newValue != null && newValue.getUsername() != oldValue.getUsername()) {
+                            updateUI(newValue);
+
+                        }
+                    } else{//this is a special case for the very first time this is selected
+                        if (newValue != null) {
+                            updateUI(newValue);
+                        }
+                    }
                     });
         });
 
     }
 
-    public void setupUserlist(){
+    private void updateUI(SessionMessage newValue){
+        inputBox.clear();
+        inputBox.editableProperty().setValue(true);
+        inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
+        System.out.println("Selected item: " + newValue.getUsername());
+        chatPane.getItems().clear();
+        client.setSelectedUserChatHistory(newValue.getUsername());
+        setUserInfo(newValue);
+        client.setUserSelection(newValue.getUsername());
+    }
+
+    public void setupUserlist() {
         userList.getItems().add("Connecting to server");
     }
 
@@ -145,10 +158,10 @@ public class Controller implements Initializable {
         if (event.getCode() == KeyCode.ENTER && !event.isShiftDown()) {
             event.consume();
             sendButtonAction();
-        } else if (event.getCode() == KeyCode.ENTER && event.isShiftDown() ) {
-            int tmp=inputBox.getCaretPosition();
-            inputBox.setText(inputBox.getText()+ "\n");
-            inputBox.positionCaret(tmp+1);
+        } else if (event.getCode() == KeyCode.ENTER && event.isShiftDown()) {
+            int tmp = inputBox.getCaretPosition();
+            inputBox.setText(inputBox.getText() + "\n");
+            inputBox.positionCaret(tmp + 1);
         }
     }
 

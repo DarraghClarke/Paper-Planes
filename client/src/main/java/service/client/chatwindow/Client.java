@@ -91,6 +91,7 @@ public class Client extends WebSocketClient {
                 List<UserMessage> historyMessageList= chatHistory.getMessageList();
 
                 for(UserMessage messages: historyMessageList){
+                    System.out.println("test");
                     controller.addToChat(messages);
                 }
                 break;
@@ -125,6 +126,7 @@ public class Client extends WebSocketClient {
     public void setSelectedUserChatHistory(String selectedUser){
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonStr = gson.toJson(new ChatLogRequest(username,selectedUser));
+        System.out.println("sent");
         send(jsonStr);
     }
 }
