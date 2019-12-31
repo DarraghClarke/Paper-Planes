@@ -3,10 +3,8 @@ package service.gateway;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
-import message.ChatLogRequest;
+import message.*;
 import message.Message;
-import message.SessionMessage;
-import message.UserMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -40,8 +38,10 @@ public class ChatEndpoint extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
+        List<SessionMessage> sessionMessageList = getSessionsList();
+
         Gson builder = new GsonBuilder().setPrettyPrinting().create();
-        conn.send(builder.toJson(getSessionsList()));
+        conn.send(builder.toJson(new ListOfSessionMessages(sessionMessageList)));
     }
 
     @Override
@@ -75,8 +75,9 @@ public class ChatEndpoint extends WebSocketServer {
                 break;
             case Message.MessageTypes.CHAT_LOG_REQUEST:
                 List<UserMessage> messages = getChatLog((ChatLogRequest) messageObj);
+                ListOfUserMessages listOfUserMessages = new ListOfUserMessages(messages);
                 Gson builder = new GsonBuilder().setPrettyPrinting().create();
-                conn.send(builder.toJson(messages));
+                conn.send(builder.toJson(listOfUserMessages));
                 break;
         }
 
@@ -84,7 +85,8 @@ public class ChatEndpoint extends WebSocketServer {
             Thread.sleep(3000);
 
             Gson builder = new GsonBuilder().setPrettyPrinting().create();
-            conn.send(builder.toJson(getSessionsList()));
+            List<SessionMessage> sessionMessageList = getSessionsList();
+            conn.send(builder.toJson(new ListOfSessionMessages(sessionMessageList)));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
