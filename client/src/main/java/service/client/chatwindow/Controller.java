@@ -116,7 +116,7 @@ public class Controller implements Initializable {
             userList.setCellFactory(new CellRenderer());
             userList.getSelectionModel().selectedItemProperty().addListener((ChangeListener<SessionMessage>)
                     (observable, oldValue, newValue) -> {
-                if(newValue!= null) {
+                if(newValue!= null && newValue.getUsername() != oldValue.getUsername()) {
                     inputBox.clear();
                     inputBox.editableProperty().setValue(true);
                     inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
