@@ -1,9 +1,9 @@
-package service.messageService;
+package service.session;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.client.MongoCollection;
-import message.ChatMessage;
+import message.SessionMessage;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
@@ -16,7 +16,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
  */
 public class SingletonMongoCollection {
 
-    private static MongoCollection<ChatMessage> SINGLE_INSTANCE;
+    private static MongoCollection<SessionMessage> SINGLE_INSTANCE;
 
     private SingletonMongoCollection() {}
 
@@ -24,15 +24,15 @@ public class SingletonMongoCollection {
      * Returns the previously created MongoCollection instance or, if this does not exist, creates and returns a new MongoCollection.
      * @return the MongoCollection, ready for use
      */
-    public static MongoCollection<ChatMessage> getInstance() {
+    public static MongoCollection<SessionMessage> getInstance() {
         if (SINGLE_INSTANCE == null) {
             CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
-                    fromProviders(PojoCodecProvider.builder().automatic(true).register(ChatMessage.class).build()));
+                    fromProviders(PojoCodecProvider.builder().automatic(true).register(SessionMessage.class).build()));
 
-            MongoClient client = new MongoClient("mongo:27017",
+            MongoClient mongoClient = new MongoClient("mongo:27017",
                     MongoClientOptions.builder().codecRegistry(pojoCodecRegistry).build());
 
-            SINGLE_INSTANCE = client.getDatabase("paper-planes").getCollection("messages", ChatMessage.class);
+            SINGLE_INSTANCE = mongoClient.getDatabase("paper-planes").getCollection("sessions", SessionMessage.class);
         }
         return SINGLE_INSTANCE;
     }

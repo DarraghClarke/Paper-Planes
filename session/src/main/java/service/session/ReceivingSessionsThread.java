@@ -1,9 +1,6 @@
 package service.session;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import message.SessionMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.bson.Document;
@@ -16,66 +13,96 @@ import static com.mongodb.client.model.Filters.eq;
  * Thread for handling applications from the RESPONSES queue
  */
 public class ReceivingSessionsThread implements Runnable {
-    private MongoClient mongoClient;
+    private MongoCollection<SessionMessage> mongoCollection;
 
     /**
      * Method that is run when this thread is started
      */
     @Override
     public void run() {
-        mongoClient = SingletonMongoClient.getInstance();
+        mongoCollection = SingletonMongoCollection.getInstance();
 
+        // We need this sleep to ensure that the activeMQ server is fully setup before we try to access it.
         try {
             Thread.sleep(10000);
-            //todo get rid of this hardcoding
-            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // This processes each message in the SESSIONS queue, and loops forever
+        while (true) {
+            Message message = getMessageFromQueue();
+
+            if (isSessionMessage(message)) {
+                SessionMessage response = getSessionMessage(message);
+
+                SessionMessage existingSession = mongoCollection.find(eq("username", response.getUsername())).first();
+
+                if (existingSession == null) {
+                    mongoCollection.insertOne(response);
+                } else {
+                    mongoCollection.updateOne(eq("username", response.getUsername()),
+                            new Document("$set", new Document("timestamp", response.getTimestamp())));
+                }
+            } else {
+                System.out.println("Unknown message type: " + message.getClass().getCanonicalName());
+            }
+        }
+    }
+
+    private Message getMessageFromQueue() {
+        try {
+            // Set up the connection and session
+            ConnectionFactory factory =
+                    new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
             Connection connection = factory.createConnection();
             connection.setClientID("sessions");
-            javax.jms.Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
+            Session session = connection.createSession(false,
+                    Session.CLIENT_ACKNOWLEDGE);
+
+            // Set up the queue, consumer, and consume the message
             connection.start();
+            Queue queue = session.createQueue("SESSIONS");
+            MessageConsumer consumer = session.createConsumer(queue);
+            Message message = consumer.receive();
 
-            Queue requestsQueue = session.createQueue("SESSIONS");
-            MessageConsumer consumer = session.createConsumer(requestsQueue);
+            // Close all connections
+            connection.close();
+            session.close();
+            consumer.close();
+            message.acknowledge();
 
-            // This while loop means the program is always listening for the next message
-            while (true) {
-                MongoDatabase database = mongoClient.getDatabase("paper-planes");
-                MongoCollection<SessionMessage> collection = database.getCollection("sessions", SessionMessage.class);
-
-                // We retrieve the message from the queue and check it is a ClientApplicationMessage
-                Message message = consumer.receive();
-                if (message instanceof ObjectMessage) {
-                    Object content = ((ObjectMessage) message).getObject();
-                    if (content instanceof SessionMessage) {
-                        SessionMessage response = (SessionMessage) content;
-
-                        SessionMessage existingSession = collection.find(eq("username", response.getUsername())).first();
-
-                        if (existingSession == null) {
-                            collection.insertOne(response);
-                        } else {
-                            collection.updateOne(eq("username", response.getUsername()),
-                                    new Document("$set", new Document("timestamp", response.getTimestamp())));
-                        }
-                    }
-
-                    // Finally, we acknowledge the message
-                    message.acknowledge();
-
-                    FindIterable<SessionMessage> cursor = collection.find();
-
-                    System.out.println("Status update:\nWe've got: " + collection);
-
-                    for (SessionMessage sessionMessage : cursor) {
-                        System.out.println(sessionMessage.getUsername() + " - " + sessionMessage.getGateway()
-                                + " - " + sessionMessage.getTimestamp());
-                    }
-
-                    System.out.println(collection.find());
-                }
-            }
-        } catch (Exception e) {
+            return message;
+        } catch (JMSException e) {
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Checks if a JMS Message is a SessionMessage or not
+     * @param message the JMS Message to check
+     * @return true or false, if the Message is a SessionMessage or not
+     */
+    private boolean isSessionMessage(Message message) {
+        try {
+            return message instanceof ObjectMessage && ((ObjectMessage) message).getObject() instanceof SessionMessage;
+        } catch (JMSException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Cases the JMS Message into a SessionMessage
+     * @param message the JMS Message to case
+     * @return the obtained SessionMessage
+     */
+    private SessionMessage getSessionMessage(Message message) {
+        try {
+            return (SessionMessage) ((ObjectMessage) message).getObject();
+        } catch (JMSException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
