@@ -150,14 +150,14 @@ public class Controller implements Initializable {
         inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
         System.out.println("Selected item: " + newValue.getUsername() + selectedUser);
         chatPane.getItems().clear();
-        Stage thisStage=(Stage)inputBox.getScene().getWindow();
-        thisStage.setTitle("Paper Planes - "+ newValue.getUsername());
         client.setSelectedUserChatHistory(newValue.getUsername());
         setUserInfo(newValue);
         client.setUserSelection(newValue.getUsername());
     }
 
     public void setupUserlist() {
+        Stage thisStage=(Stage)inputBox.getScene().getWindow();
+        thisStage.setTitle("Paper Planes - Logged in as "+ username);
         userList.getItems().add("Connecting to server");
         inputBox.deselect();
     }
