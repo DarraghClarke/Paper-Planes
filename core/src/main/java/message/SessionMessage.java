@@ -6,11 +6,11 @@ public class SessionMessage extends Message {
     private String gateway;
 
     public SessionMessage() {
-        super(MessageContainer.MessageTypes.SESSION_MESSAGE);
+        super(Message.MessageTypes.SESSION_MESSAGE);
     }
 
     public SessionMessage(long timestamp, String username, String gateway) {
-        super(MessageContainer.MessageTypes.SESSION_MESSAGE);
+        super(Message.MessageTypes.SESSION_MESSAGE);
         this.timestamp = timestamp;
         this.username = username;
         this.gateway = gateway;

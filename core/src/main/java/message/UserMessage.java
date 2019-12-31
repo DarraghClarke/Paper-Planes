@@ -8,12 +8,12 @@ public class UserMessage extends Message implements Comparable<UserMessage> {
     private boolean processed;
 
     public UserMessage() {
-        super(MessageContainer.MessageTypes.USER_MESSAGE);
+        super(Message.MessageTypes.USER_MESSAGE);
         processed = false;
     }
 
     public UserMessage(String message, String sentTo, String sentBy) {
-        super(MessageContainer.MessageTypes.USER_MESSAGE);
+        super(Message.MessageTypes.USER_MESSAGE);
         this.message = message;
         this.sentTo = sentTo; // ip address?
         this.sentBy = sentBy;

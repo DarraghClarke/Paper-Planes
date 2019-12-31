@@ -12,4 +12,10 @@ public class Message implements Serializable {
     public String getType() {
         return type;
     }
+
+    public static class MessageTypes {
+        final public static String SESSION_MESSAGE = "SessionMessage";
+        final public static String USER_MESSAGE = "UserMessage";
+        final public static String CHAT_LOG_REQUEST = "ChatLongRequest";
+    }
 }

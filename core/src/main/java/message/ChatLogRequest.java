@@ -5,11 +5,11 @@ public class ChatLogRequest extends Message {
     String requestedUser;
 
     public ChatLogRequest() {
-        super(MessageContainer.MessageTypes.CHAT_LOG_REQUEST);
+        super(Message.MessageTypes.CHAT_LOG_REQUEST);
     }
 
     public ChatLogRequest(String requestingUser, String requestedUser){
-        super(MessageContainer.MessageTypes.CHAT_LOG_REQUEST);
+        super(Message.MessageTypes.CHAT_LOG_REQUEST);
         this.requestingUser = requestingUser;
         this.requestedUser = requestedUser;
     }
