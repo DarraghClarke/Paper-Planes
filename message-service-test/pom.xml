@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>paper-planes</groupId>
-    <artifactId>messageService</artifactId>
+    <artifactId>message-service-test</artifactId>
     <version>0.1.0</version>
 
     <properties>
