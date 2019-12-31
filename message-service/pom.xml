@@ -52,12 +52,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>paper-planes</groupId>
-            <artifactId>gateway</artifactId>
-            <version>0.1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver</artifactId>
             <version>3.11.0</version>

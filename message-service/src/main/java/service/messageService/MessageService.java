@@ -1,119 +1,115 @@
 package service.messageService;
 
-import com.mongodb.*;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
-
 import message.Message;
 import message.SessionMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.bson.Document;
-import service.session.SessionsService;
+import org.springframework.web.client.RestTemplate;
 
 import javax.jms.*;
-import java.net.UnknownHostException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class MessageService {
     public static List<Message> messageList = new ArrayList<>();
-    public static List<String> receiverList = new ArrayList<>();
 
     public MessageService() {
 
     }
 
-    public static void main(String[] args) throws InterruptedException, UnknownHostException {
-        Receiver receiver = new Receiver();
-        messageList = receiver.recieveMessages();
-        //access db and forward
-        MongoClient mongoClient = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
-        MongoDatabase database = mongoClient.getDatabase("MESSAGES");
+    public static void main(String[] args)  {
 
-        for (Message message : messageList) {
-            MongoCollection<Document> collection = database.getCollection(message.getSender());
-            Document newDocumenet = new Document("sender", message.getSender())
-                    .append("receiver", message.getReciever())
-                    .append("message", message.getMessage())
-                    .append("time", message.getTime());
-
-            collection.insertOne(newDocumenet);
-        }
-
-        getGateway(database);
-
-
-    }
-
-    public static List<String> getReceiver(List<Message> messages) {
-        for (Message message : messages) {
-            receiverList.add(message.getReciever());
-            System.out.println("Message Received: " + message.getReciever());
-        }
-        return receiverList;
-    }
-
-    //forward messages to the correct gateway
-    public static void getGateway(MongoDatabase database) {
-        MongoIterable<String> collectionList = database.listCollectionNames();
-        SessionsService session = new SessionsService();
-
-        for (String collection : collectionList) {
-            //get gateway
-            BasicDBObject query = new BasicDBObject();
-            query.put("sender", 1);
-            DBCollection coll = (DBCollection) database.getCollection(collection);
-            DBCursor cursor = coll.find(query);
-            String sender = cursor.curr().get("sender").toString();
-            SessionMessage gateway = session.getSession(sender);
-            Message message = new Message();
-            message.setTime((Instant) cursor.curr().get("time"));
-            message.setSender(cursor.curr().get("sender").toString());
-            message.setSender(cursor.curr().get("receiver").toString());
-            message.setSender(cursor.curr().get("message").toString());
-
-            sendMessage(gateway, message);
-
-
-        }
-    }
-
-
-    public static void sendMessage(SessionMessage gateway, Message message) {
         try {
-            Thread.sleep(10000);
+            Receiver receiver = new Receiver();
+            messageList = receiver.receiveMessages();
+            //access db and forward
+                MongoClient mongoClient = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+                MongoDatabase database = mongoClient.getDatabase("messages");
+                MongoCollection<Message> collection = database.getCollection("messages", Message.class);
+                populateDatabase(collection, mongoClient);
 
-            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
-            Connection connection = factory.createConnection();
-            connection.setClientID("Message");
-            javax.jms.Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
-            connection.start();
-
-            Queue requestsQueue = session.createQueue("MESSAGES");
-            MessageProducer producer = session.createProducer(requestsQueue);
-
-            //CONNECT TO THE CORRECT GATEWAY
-            // websockets
-            
-
-            producer.send((javax.jms.Message) message);
-            System.out.println("sent message");
-
-            Thread.sleep(3000);
-            System.out.println("rest time...");
 
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
 
-        } catch (JMSException e) {
-            e.printStackTrace();
+        public static void populateDatabase (MongoCollection < Message > messages, MongoClient mongoClient){
+            try {
+                Thread.sleep(10000);
+                ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
+                Connection connection = factory.createConnection();
+                connection.setClientID("messages");
+                javax.jms.Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
+                connection.start();
+
+                Queue requestsQueue = session.createQueue("MESSAGES");
+                MessageConsumer consumer = session.createConsumer(requestsQueue);
+
+
+                while (true) {
+                    MongoDatabase database = mongoClient.getDatabase("messages");
+                    MongoCollection<Message> collection = database.getCollection("messages", Message.class);
+
+
+                    javax.jms.Message message = consumer.receive();
+                    if (message instanceof ObjectMessage) {
+                        Object content = ((ObjectMessage) message).getObject();
+                        if (content instanceof Message) {
+                            Message response = (Message) content;
+                            Document query = new Document();
+                            query.append("_id", "messages");
+                            Document setData = new Document();
+                            setData.append("sender", response.getSender()).append("time", response.getTime()).append("receiver", response.getReciever()).append("message", response.getMessage());
+                            Document update = new Document();
+                            update.append("$set", setData);
+                            collection.updateOne(query, update);
+
+                            message.acknowledge();
+                            getGateway(collection, response);
+                        }
+                    }
+                }
+            }
+
+        catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (JMSException e) {
+                e.printStackTrace();
+
+            }
         }
 
 
+        //forward messages to the correct gateway
+        public static void getGateway (MongoCollection<Message> database, Message response){
+//            set up a RestTemplate
+            RestTemplate restTemplate = new RestTemplate();
+            Document query = new Document("sender", 1);
+            String username = "";
+//          String username =  database.find(query, response.getSender()).first();
+            Object getObject = restTemplate.getForObject("http://session:8081/ " + username, String.class);
+
+//            send a GET request to "session:8080/sessions/username-goes-here"
+//            access the gateway variable of the returned object.
+
+
+        }
+
+
+        public static void sendMessage (SessionMessage gateway, Message message){
+
+                //CONNECT TO THE CORRECT GATEWAY
+                // websockets
+
+
+        }
     }
-}
+
+
 

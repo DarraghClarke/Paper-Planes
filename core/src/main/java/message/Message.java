@@ -13,7 +13,7 @@ public class Message implements Serializable {
     public Message() {
     }
     
-    public String getSender() {
+    public String  getSender() {
         return sender;
     }
 

@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 //recieves messages from Gateway and stores the messages in database
 public class Receiver {
-    public  LinkedList<message.Message> recieveMessages() throws InterruptedException {
+    public  LinkedList<message.Message> receiveMessages() throws InterruptedException {
         Thread.sleep(20000);
         String host = "localhost";
         String[] args = new String[0];
@@ -17,14 +17,14 @@ public class Receiver {
             }
             System.out.println("Starting Receiver on: " + host);
                 host = "activemq";
+
             try {
 
                 ConnectionFactory factory =
                         new ActiveMQConnectionFactory("failover://tcp://" + host + ":61616");
                 Connection connection = factory.createConnection();
                 connection.setClientID("receiver");
-                Session session = connection.createSession(false,
-                        Session.CLIENT_ACKNOWLEDGE);
+                Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
 
 
                 System.out.println("Connection Started");
