@@ -150,7 +150,7 @@ public class Controller implements Initializable {
         inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
         System.out.println("Selected item: " + newValue.getUsername() + selectedUser);
         chatPane.getItems().clear();
-        client.setSelectedUserChatHistory(newValue.getUsername());
+        client.getSelectedUserChatHistory(newValue.getUsername());
         setUserInfo(newValue);
         client.setUserSelection(newValue.getUsername());
     }

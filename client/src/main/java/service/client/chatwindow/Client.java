@@ -114,19 +114,20 @@ public class Client extends WebSocketClient {
         createChatMessage.setTimestamp(Instant.now().getEpochSecond());
         createChatMessage.setMessage(msg);
         createChatMessage.setSentTo(userSelected);
-        controller.addToChat(createChatMessage);//this makes the message appear for the user in the chat panel
+        //controller.addToChat(createChatMessage);//this makes the message appear for the user in the chat panel
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         String jsonStr = gson.toJson(createChatMessage);
         send(jsonStr);
+        getSelectedUserChatHistory(userSelected);
     }
 
     public void setUserSelection(String selectedUser){
         userSelected = selectedUser;
     }
 
-    public void setSelectedUserChatHistory(String selectedUser){
+    public void getSelectedUserChatHistory(String selectedUser){
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonStr = gson.toJson(new ChatLogRequest(username,selectedUser));
         System.out.println("sent");
