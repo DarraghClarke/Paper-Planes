@@ -156,6 +156,7 @@ public class Controller implements Initializable {
 
     public void setupUserlist() {
         userList.getItems().add("Connecting to server");
+        inputBox.deselect();
     }
 
     public void setUsername(String username) {
