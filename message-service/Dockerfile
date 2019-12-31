@@ -1,4 +1,7 @@
 FROM openjdk:8-jre-alpine
-ENV CONTAINER_NAME localhost
-COPY target/messageService-0.1.0-jar-with-dependencies.jar /messageService-0.1.0.jar
-CMD sleep 5 ; /usr/bin/java -cp /gateway-0.1.0.jar service.messageService.MessageService  ${CONTAINER_NAME}
+VOLUME /tmp
+ARG DEPENDENCY=target/dependency
+COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY ${DEPENDENCY}/META-INF /app/META-INF
+COPY ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java","-cp","app:app/lib/*","service.messageService.Server", "mongo"]

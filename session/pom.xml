@@ -22,6 +22,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>paper-planes</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
@@ -35,11 +40,6 @@
             <artifactId>core</artifactId>
             <version>1.0</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>paper-planes</groupId>
-            <artifactId>core</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -88,6 +88,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

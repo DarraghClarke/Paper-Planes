@@ -3,8 +3,8 @@ package service.gateway;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import message.Message;
 import message.SessionMessage;
+import message.UserMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -45,7 +45,7 @@ public class ChatEndpoint extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
         //tbh gateway probably won't unpack this message, instead passing it on, but for now just to prove this works it will
         Gson gson = new Gson();
-        Message msg = gson.fromJson(message, Message.class);
+        UserMessage msg = gson.fromJson(message, UserMessage.class);
         System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
 
         try {
@@ -55,7 +55,7 @@ public class ChatEndpoint extends WebSocketServer {
             Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
             connection.start();
 
-            SessionMessage sessionMessage = new SessionMessage(msg.getTime().getEpochSecond(), msg.getSender(), InetAddress.getLocalHost().getHostName());
+            SessionMessage sessionMessage = new SessionMessage(msg.getTimestamp(), msg.getSentBy(), InetAddress.getLocalHost().getHostName());
 
             Queue requestsQueue = session.createQueue("SESSIONS");
             MessageProducer producer = session.createProducer(requestsQueue);

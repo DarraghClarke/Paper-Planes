@@ -1,5 +1,6 @@
 package client;
 
+import message.UserMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
@@ -23,21 +24,18 @@ public class Application {
             System.out.println("Queue created");
             MessageProducer producer = session.createProducer(requestsQueue);
 
-            message.Message message = new message.Message();
+            UserMessage message = new UserMessage();
             message.setMessage("hello");
-            message.setReciever("Sinead");
-            message.setSender("Cooper");
-            message.setTime(Instant.now());
+            message.setSentTo("Sinead");
+            message.setSentBy("Cooper");
+            message.setTimestamp(Instant.now().getEpochSecond());
             System.out.println("Sending message...");
-            producer.send((Message) message);
+            producer.send(session.createObjectMessage(message));
             System.out.println("sent message");
 
             Thread.sleep(3000);
 
             System.out.println("rest time...");
-
-
-
        } catch (Exception e) {
             e.printStackTrace();
         }
