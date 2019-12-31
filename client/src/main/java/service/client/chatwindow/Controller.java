@@ -29,6 +29,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 
@@ -69,7 +70,9 @@ public class Controller implements Initializable {
                 Instant instant = Instant.ofEpochSecond(msg.getTimestamp());
                 LocalDateTime time = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 //Long time = msg.getTimestamp();
-                hBox.getChildren().addAll(new Label(msg.getSentBy()), label, new Label(time.getHour() + ":" + time.getMinute()));//todo check time label
+
+                hBox.getChildren().addAll(new Label(msg.getSentBy()), label, new Label((time.format(DateTimeFormatter.ofPattern("HH:mm")))));//todo check time label
+
                 return hBox;
             }
         };
@@ -88,8 +91,7 @@ public class Controller implements Initializable {
                 label.setBubbleSpec(BubbleSpec.FACE_RIGHT_CENTER);
                 Instant instant = Instant.ofEpochSecond(msg.getTimestamp());
                 LocalDateTime time = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-                //Long time = msg.getTimestamp();
-                hBox.getChildren().addAll(new Label(time.getHour() + ":" + time.getMinute()), label, new Label(msg.getSentBy()));//todo check time label
+                hBox.getChildren().addAll(new Label((time.format(DateTimeFormatter.ofPattern("HH:mm")))), label, new Label(msg.getSentBy()));//todo check time label
                 return hBox;
             }
         };

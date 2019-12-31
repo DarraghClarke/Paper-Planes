@@ -3,6 +3,7 @@ package service.client.chatwindow;
 import com.google.gson.Gson;
 import message.SessionMessage;
 
+import java.time.Instant;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,7 +24,7 @@ public class Heartbeat implements  Runnable{
                             Gson gson= new Gson();
                             // Gateway is null here because Client thinks the gateway to localhost. This isn't helpful,
                             // so gateway will figure this out
-                            SessionMessage heartbeat = new SessionMessage(System.currentTimeMillis(),client.username,null);
+                            SessionMessage heartbeat = new SessionMessage(Instant.now().getEpochSecond(),client.username,null);
                             String jsonStr = gson.toJson(heartbeat);
                             client.send(jsonStr);
                             System.out.println("we;ve done it again");

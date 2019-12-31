@@ -36,7 +36,7 @@ public class Client extends WebSocketClient {
         controller.setupUserlist();
 //        System.out.println("new connection opened");
         Gson gson= new Gson();
-        SessionMessage heartbeat=new SessionMessage(System.currentTimeMillis(),username,gateway);
+        SessionMessage heartbeat=new SessionMessage(Instant.now().getEpochSecond(),username,null);
         String jsonStr = gson.toJson(heartbeat);
         send(jsonStr);
 //        System.out.println("we;ve done it again");
@@ -109,7 +109,7 @@ public class Client extends WebSocketClient {
     public void sendMessage(String msg) {
         ChatMessage createChatMessage = new ChatMessage();
         createChatMessage.setSentBy(username);
-        createChatMessage.setTimestamp(System.currentTimeMillis());
+        createChatMessage.setTimestamp(Instant.now().getEpochSecond());
         createChatMessage.setMessage(msg);
         createChatMessage.setSentTo(userSelected);
         controller.addToChat(createChatMessage);//this makes the message appear for the user in the chat panel
