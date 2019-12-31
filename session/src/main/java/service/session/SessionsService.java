@@ -1,11 +1,13 @@
 package service.session;
 
 
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import message.SessionMessage;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +21,7 @@ public class SessionsService {
 
     public SessionsService() {
         try {
-            MongoClient mongoClient = SingletonMongoCollection.getInstance();
-            MongoDatabase database = mongoClient.getDatabase("paper-planes");
-            collection = database.getCollection("sessions", SessionMessage.class);
+            collection = SingletonMongoCollection.getInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
