@@ -1,22 +1,30 @@
 package message;
 
-public class UserMessage extends Message implements Comparable<UserMessage> {
+/**
+ * ChatMessage – This is a chat message sent between two users.
+ * It's Comparable to help make sorting messages easier
+ */
+public class ChatMessage extends Message implements Comparable<ChatMessage> {
     private String message;
     private String sentTo;
     private String sentBy;
     private long timestamp;
+
+    // "processed" signifies if the ChatMessage has been processed by the system yet – if the message is inbound
+    // or outbound in the system
     private boolean processed;
 
-    public UserMessage() {
+    public ChatMessage() {
         super(Message.MessageTypes.USER_MESSAGE);
         processed = false;
     }
 
-    public UserMessage(String message, String sentTo, String sentBy) {
+    public ChatMessage(String message, String sentTo, String sentBy) {
         super(Message.MessageTypes.USER_MESSAGE);
         this.message = message;
         this.sentTo = sentTo; // ip address?
         this.sentBy = sentBy;
+        processed = false;
     }
 
     public String getSentTo() {
@@ -57,8 +65,11 @@ public class UserMessage extends Message implements Comparable<UserMessage> {
         this.processed = processed;
     }
 
+    /*
+     * This is used to compare two ChatMessages to see which is newest. Used in sorting.
+     */
     @Override
-    public int compareTo(UserMessage o) {
+    public int compareTo(ChatMessage o) {
         return (int)(timestamp - o.getTimestamp());
     }
 }

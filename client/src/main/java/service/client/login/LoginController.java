@@ -43,6 +43,9 @@ public class LoginController implements Initializable {
         this.scene = new Scene(window);
 
         //this gets the gateway from the load balancer
+        //RestTemplate restTemplate = new RestTemplate();
+        //String gateway = restTemplate.getForObject("http://localhost:8081/gateways/random", String.class);
+        System.out.println("finna connect...");
         Client client = new Client(new URI("ws://localhost:8080/"), username, controller);
         Thread x = new Thread(client);
         x.start();
