@@ -26,6 +26,9 @@ import service.client.messages.bubble.BubbledLabel;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ResourceBundle;
 
 
@@ -63,8 +66,10 @@ public class Controller implements Initializable {
                 label.setText(msg.getMessage());
                 label.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, null, null)));
                 label.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
-                Long time = msg.getTimestamp();
-                hBox.getChildren().addAll(new Label(msg.getSentBy()), label, new Label(time.toString()));//todo check time label
+                Instant instant = Instant.ofEpochSecond(msg.getTimestamp());
+                LocalDateTime time = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                //Long time = msg.getTimestamp();
+                hBox.getChildren().addAll(new Label(msg.getSentBy()), label, new Label(time.getHour() + ":" + time.getMinute()));//todo check time label
                 return hBox;
             }
         };
@@ -81,8 +86,10 @@ public class Controller implements Initializable {
                 label.setText(msg.getMessage());
                 label.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, null, null)));
                 label.setBubbleSpec(BubbleSpec.FACE_RIGHT_CENTER);
-                Long time = msg.getTimestamp();
-                hBox.getChildren().addAll(new Label(time.toString()), label, new Label(msg.getSentBy()));//todo check time label
+                Instant instant = Instant.ofEpochSecond(msg.getTimestamp());
+                LocalDateTime time = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                //Long time = msg.getTimestamp();
+                hBox.getChildren().addAll(new Label(time.getHour() + ":" + time.getMinute()), label, new Label(msg.getSentBy()));//todo check time label
                 return hBox;
             }
         };
@@ -100,8 +107,8 @@ public class Controller implements Initializable {
     }
 
     public void setUserInfo(SessionMessage user) {
-        if (System.currentTimeMillis() / 1000l - user.getTimestamp() > 60) {//i think this means last minute online
-            userInfo.setText(user.getUsername() + "-Last online: " + (System.currentTimeMillis() / 1000l - user.getTimestamp()) / 60 + " minutes ago");
+        if (Instant.now().getEpochSecond() - user.getTimestamp() > 60) {//i think this means last minute online
+            userInfo.setText(user.getUsername() + "-Last online: " + (Instant.now().getEpochSecond() - user.getTimestamp()) / 60 + " minutes ago");
         } else {
             userInfo.setText(user.getUsername() + "-Online Now");
         }

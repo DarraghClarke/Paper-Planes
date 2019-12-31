@@ -9,6 +9,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import service.client.login.LoginController;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#client-example
@@ -112,6 +113,7 @@ public class Client extends WebSocketClient {
         createChatMessage.setMessage(msg);
         createChatMessage.setSentTo(userSelected);
         controller.addToChat(createChatMessage);//this makes the message appear for the user in the chat panel
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         // String jsonStr = gson.toJson(messageContainer);

@@ -12,6 +12,8 @@ import javafx.scene.text.Text;
 import javafx.util.Callback;
 import message.SessionMessage;
 
+import java.time.Instant;
+
 class CellRenderer implements Callback<ListView<SessionMessage>, ListCell<SessionMessage>> {
     @Override
     public ListCell<SessionMessage> call(ListView<SessionMessage> p) {
@@ -29,7 +31,7 @@ class CellRenderer implements Callback<ListView<SessionMessage>, ListCell<Sessio
 
                             Text username = new Text(user.getUsername());//atm just adds user name
                             Circle circle = new Circle(0, 0, 10);
-                            if(System.currentTimeMillis() / 1000l - user.getTimestamp() > 60 ){
+                            if(Instant.now().getEpochSecond() - user.getTimestamp() > 60 ){
                                 //online in the last minute
                                 circle.setFill(Color.GRAY);
                             } else{
