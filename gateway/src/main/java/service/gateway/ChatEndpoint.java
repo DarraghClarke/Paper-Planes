@@ -17,7 +17,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -61,7 +66,7 @@ public class ChatEndpoint extends WebSocketServer {
 
         System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
 
-        message.Message messageObj = gson.fromJson(message, message.Message.class);
+        Message messageObj = gson.fromJson(message, message.Message.class);
 
         switch (messageObj.getType()) {
             case Message.MessageTypes.USER_MESSAGE:
@@ -109,8 +114,6 @@ public class ChatEndpoint extends WebSocketServer {
             sendSessionMessage(sessionMessage);
             sendUserMessageToProcessingQueue(userMessage);
         }
-
-        // todo: send the user message to message-service
 
     }
 
