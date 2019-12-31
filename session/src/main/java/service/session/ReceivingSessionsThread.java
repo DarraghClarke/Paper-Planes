@@ -10,7 +10,7 @@ import javax.jms.*;
 import static com.mongodb.client.model.Filters.eq;
 
 /**
- * Thread for handling applications from the RESPONSES queue
+ * Thread for handling messages in the SESSIONS queue and updating the database
  */
 public class ReceivingSessionsThread implements Runnable {
     private MongoCollection<SessionMessage> mongoCollection;
@@ -36,8 +36,10 @@ public class ReceivingSessionsThread implements Runnable {
             if (isSessionMessage(message)) {
                 SessionMessage response = getSessionMessage(message);
 
+                // Check if there's already an entry in sessions under this username
                 SessionMessage existingSession = mongoCollection.find(eq("username", response.getUsername())).first();
 
+                // If not, insert. Otherwise, update the existing entry with the latest timestamp
                 if (existingSession == null) {
                     mongoCollection.insertOne(response);
                 } else {
@@ -50,6 +52,9 @@ public class ReceivingSessionsThread implements Runnable {
         }
     }
 
+    /**
+     * Reads from the SESSIONS queue and returns the message
+     */
     private Message getMessageFromQueue() {
         try {
             // Set up the connection and session
@@ -64,8 +69,8 @@ public class ReceivingSessionsThread implements Runnable {
             connection.start();
             Queue queue = session.createQueue("SESSIONS");
             MessageConsumer consumer = session.createConsumer(queue);
-            Message message = consumer.receive();
 
+            Message message = consumer.receive();
             message.acknowledge();
 
             // Close all connections

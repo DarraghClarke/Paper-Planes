@@ -27,11 +27,20 @@ public class SessionsService {
         }
     }
 
+    /**
+     * Gets the SessionMessage object for a given user
+     * @param username The user to lookup
+     * @return The corresponding SessionMessage
+     */
     @RequestMapping(value="sessions/{username}",method=RequestMethod.GET)
-    public SessionMessage getSession(@PathVariable("username") String userId) {
-        return collection.find(new BasicDBObject().append("username", userId)).first();
+    public SessionMessage getSession(@PathVariable("username") String username) {
+        return collection.find(new BasicDBObject().append("username", username)).first();
     }
 
+    /**
+     * Gets all SessionMessage objects in the database
+     * @return all SessionMessage objects
+     */
     @RequestMapping(value="sessions",
             method=RequestMethod.GET)
     public List<SessionMessage> getSessions() {
