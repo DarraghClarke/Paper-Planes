@@ -1,8 +1,6 @@
 package service.messageService;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import message.ChatMessage;
 import message.SessionMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -13,18 +11,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * Thread for handling applications from the RESPONSES queue
+ * Thread for handling ChatMessages from the MESSAGES queue
  */
 public class ReceivingMessagesThread implements Runnable {
-    private MongoClient mongoClient;
+    private MongoCollection<ChatMessage> mongoCollection;
 
     /**
      * Method that is run when this thread is started
      */
     @Override
     public void run() {
-        mongoClient = SingletonMongoClient.getInstance();
+        mongoCollection = SingletonMongoCollection.getInstance();
 
+        // We need this sleep to ensure that the activeMQ server is fully setup before we try to access it.
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
@@ -32,8 +31,36 @@ public class ReceivingMessagesThread implements Runnable {
         }
 
         try {
+            while (true) {
+                Message message = getMessageFromQueue();
+                if (isChatMessage(message)) {
+                    ChatMessage response = getChatMessage(message);
+
+                    mongoCollection.insertOne(response);
+                    response.setProcessed(true);
+
+                    RestTemplate restTemplate = new RestTemplate();
+                    SessionMessage sessionMessage = restTemplate.getForObject("http://session:8080/sessions/"
+                            + response.getSentBy(), SessionMessage.class);
+
+                    MessageForwardingClient messageForwardingClient = new MessageForwardingClient(
+                            new URI("ws://" + sessionMessage.getGateway() + ":8080/"), response);
+                    Thread x = new Thread(messageForwardingClient);
+                    x.start();
+                } else {
+                    System.out.println("Unknown message type: " + message.getClass().getCanonicalName());
+                }
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Message getMessageFromQueue() {
+        try {
             ConnectionFactory factory =
                     new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
+
             Connection connection = factory.createConnection();
             connection.setClientID("message-service");
             Session session = connection.createSession(false,
@@ -45,33 +72,27 @@ public class ReceivingMessagesThread implements Runnable {
 
             System.out.println("Connection Started");
 
-
-            MongoDatabase database = mongoClient.getDatabase("paper-planes");
-            MongoCollection<ChatMessage> collection = database.getCollection("messages", ChatMessage.class);
-
-            while (true) {
-                Message message = consumer.receive();
-                if (message instanceof ObjectMessage) {
-                    Object content = ((ObjectMessage) message).getObject();
-                    if (content instanceof ChatMessage) {
-                        ChatMessage response = (ChatMessage) content;
-                        System.out.println(response.getSentBy() + " -> " + response.getSentTo() + ": " + response.getMessage());
-                        collection.insertOne(response);
-                        response.setProcessed(true);
-
-                        RestTemplate restTemplate = new RestTemplate();
-                        SessionMessage sessionMessage = restTemplate.getForObject("http://session:8080/sessions/" + response.getSentBy(), SessionMessage.class);
-                        System.out.println("Opening socket to " + "ws://" + sessionMessage.getGateway() + ":8080/");
-                        MessageForwardingClient messageForwardingClient = new MessageForwardingClient(new URI("ws://" + sessionMessage.getGateway() + ":8080/"), response);
-                        Thread x = new Thread(messageForwardingClient);
-                        x.start();
-                    }
-                } else {
-                    System.out.println("Unknown message type: " + message.getClass().getCanonicalName());
-                }
-            }
-        } catch (JMSException | URISyntaxException e) {
+            return consumer.receive();
+        } catch (JMSException e) {
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    private boolean isChatMessage(Message message) {
+        try {
+            return message instanceof ObjectMessage && ((ObjectMessage) message).getObject() instanceof ChatMessage;
+        } catch (JMSException e) {
+            return false;
+        }
+    }
+
+    private ChatMessage getChatMessage(Message message) {
+        try {
+            return (ChatMessage) ((ObjectMessage) message).getObject();
+        } catch (JMSException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

@@ -8,6 +8,9 @@ import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 
+/**
+ * WebSocketClient for forwarding messages on to the gateway
+ */
 public class MessageForwardingClient extends WebSocketClient {
     private ChatMessage chatMessage;
 
@@ -18,7 +21,7 @@ public class MessageForwardingClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        System.out.println("WebSocket connection opened!");
+        // When the connection opens, we want to send the user message instantly
         sendUserMessage();
     }
 
@@ -33,6 +36,9 @@ public class MessageForwardingClient extends WebSocketClient {
         e.printStackTrace();
     }
 
+    /**
+     * Sends the ChatMessage to the gateway via a WebSocket connection
+     */
     private void sendUserMessage() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
