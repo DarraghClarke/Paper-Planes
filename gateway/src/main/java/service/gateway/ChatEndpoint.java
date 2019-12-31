@@ -1,8 +1,10 @@
 package service.gateway;
 
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import message.ChatLogRequest;
+import message.Message;
 import message.SessionMessage;
 import message.UserMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -21,19 +23,25 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-//based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#server-example
 
 public class ChatEndpoint extends WebSocketServer {
 
+    private Map<String, WebSocket> cache;
+
     public ChatEndpoint(InetSocketAddress address) {
         super(address);
+        cache = new HashMap<>();
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
+        Gson builder = new GsonBuilder().setPrettyPrinting().create();
+        conn.send(builder.toJson(getSessionsList()));
     }
 
     @Override
@@ -43,11 +51,76 @@ public class ChatEndpoint extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        //tbh gateway probably won't unpack this message, instead passing it on, but for now just to prove this works it will
-        Gson gson = new Gson();
-        UserMessage msg = gson.fromJson(message, UserMessage.class);
+        RuntimeTypeAdapterFactory<message.Message> adapter = RuntimeTypeAdapterFactory
+                .of(message.Message.class, "type")
+                .registerSubtype(SessionMessage.class, Message.MessageTypes.SESSION_MESSAGE)
+                .registerSubtype(UserMessage.class, Message.MessageTypes.USER_MESSAGE)
+                .registerSubtype(ChatLogRequest.class, Message.MessageTypes.CHAT_LOG_REQUEST);
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(adapter).create();
+
         System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
 
+        message.Message messageObj = gson.fromJson(message, message.Message.class);
+
+        switch (messageObj.getType()) {
+            case Message.MessageTypes.USER_MESSAGE:
+                UserMessage userMessage = (UserMessage) messageObj;
+                processUserMessage(userMessage);
+                break;
+            case Message.MessageTypes.SESSION_MESSAGE:
+                SessionMessage sessionMessage = (SessionMessage) messageObj;
+                sendSessionMessage(sessionMessage);
+                addUserToCache(sessionMessage, conn);
+                break;
+            case Message.MessageTypes.CHAT_LOG_REQUEST:
+                List<UserMessage> messages = getChatLog((ChatLogRequest) messageObj);
+                Gson builder = new GsonBuilder().setPrettyPrinting().create();
+                conn.send(builder.toJson(messages));
+                break;
+        }
+
+        try {
+            Thread.sleep(3000);
+
+            Gson builder = new GsonBuilder().setPrettyPrinting().create();
+            conn.send(builder.toJson(getSessionsList()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void processUserMessage(UserMessage userMessage) {
+        SessionMessage sessionMessage = null;
+
+        try {
+            sessionMessage = new SessionMessage(userMessage.getTimestamp(), userMessage.getSentBy(), InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        if (userMessage.isProcessed()) {
+            WebSocket connection = cache.get(userMessage.getSentTo());
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String jsonStr = gson.toJson(userMessage);
+            connection.send(jsonStr);
+        } else {
+            sendSessionMessage(sessionMessage);
+            sendUserMessageToProcessingQueue(userMessage);
+        }
+
+        // todo: send the user message to message-service
+
+    }
+
+    private void addUserToCache(SessionMessage sessionMessage, WebSocket socket) {
+        if (cache.containsKey(sessionMessage.getUsername())) {
+            cache.put(sessionMessage.getUsername(), socket);
+        }
+    }
+
+    private void sendUserMessageToProcessingQueue(UserMessage userMessage) {
         try {
             ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
             Connection connection = factory.createConnection();
@@ -55,7 +128,25 @@ public class ChatEndpoint extends WebSocketServer {
             Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
             connection.start();
 
-            SessionMessage sessionMessage = new SessionMessage(msg.getTimestamp(), msg.getSentBy(), InetAddress.getLocalHost().getHostName());
+            Queue requestsQueue = session.createQueue("MESSAGES");
+            MessageProducer producer = session.createProducer(requestsQueue);
+            producer.send(session.createObjectMessage(userMessage));
+
+            producer.close();
+            session.close();
+            connection.close();
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendSessionMessage(SessionMessage sessionMessage) {
+        try {
+            ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
+            Connection connection = factory.createConnection();
+            connection.setClientID("gateway");
+            Session session = connection.createSession(false, javax.jms.Session.CLIENT_ACKNOWLEDGE);
+            connection.start();
 
             Queue requestsQueue = session.createQueue("SESSIONS");
             MessageProducer producer = session.createProducer(requestsQueue);
@@ -64,48 +155,46 @@ public class ChatEndpoint extends WebSocketServer {
             producer.close();
             session.close();
             connection.close();
-        } catch (JMSException | UnknownHostException e) {
+        } catch (JMSException e) {
             e.printStackTrace();
         }
+    }
 
-        //sample code
-//        Message Response = new Message();
-//        Response.setMessage("returning message: "+msg.getMessage());
-//        Response.setSender("Gateway");
-//        Response.setReciever(msg.getSender());
-//        Response.setTime(Instant.now());
-        // long timestamp, String username, String gateway
-//
-//        List<SessionMessage> Response = new ArrayList<>();
-//        Response.add(new SessionMessage(19l,"big Tom","this gateway idk"));
-//        Response.add(new SessionMessage(29l,"GIT","this gateway idk"));
-        try {
-//            SessionMessage sessionMessage = new SessionMessage(Instant.now().getEpochSecond(), "oisinq-baby", InetAddress.getLocalHost().getHostAddress()); // (msg.getTime().getEpochSecond(), msg.getSender(), getAddress().toString()
-//            System.out.println("Sending message...");
-//            producer.send(session.createObjectMessage(sessionMessage));
-//            System.out.println("sent message");
+    private List<UserMessage> getChatLog(ChatLogRequest chatLogRequest) {
+        RestTemplate restTemplate = new RestTemplate();
 
-            Thread.sleep(3000);
+        ResponseEntity<List<UserMessage>> rateResponse =
+                restTemplate.exchange("http://message-service:8080/history?sendTo="+chatLogRequest.getRequestingUser()+"&sendFrom="+chatLogRequest.getRequestedUser(),//todo make this address better
+                        HttpMethod.GET, null, new ParameterizedTypeReference<List<UserMessage>>() {
+                        });
 
-            System.out.println("rest time...");
-            RestTemplate restTemplate = new RestTemplate();
-
-            ResponseEntity<List<SessionMessage>> rateResponse =
-                    restTemplate.exchange("http://session:8080/sessions",
-                            HttpMethod.GET, null, new ParameterizedTypeReference<List<SessionMessage>>() {
-                            });
-            System.out.println("Code: " + rateResponse.getStatusCodeValue());
-            List<SessionMessage> response = rateResponse.getBody();
-            System.out.println("There are " + response.size() + " messages. Neat.");
-            for (SessionMessage message2 : response) {
-                System.out.println("Content: " + message2.getTimestamp() + " - " + message2.getUsername() + " - " + message2.getGateway());
-            }
-            Gson builder = new GsonBuilder().setPrettyPrinting().create();
-            String jsonStr = builder.toJson(response);
-            conn.send(jsonStr);
-        } catch (Exception ex) {
-            System.out.println("hi");
+        System.out.println("Code: " + rateResponse.getStatusCodeValue());
+        List<UserMessage> response = rateResponse.getBody();
+        for (UserMessage message2 : response) {
+            System.out.println("Content: " + message2.getTimestamp() + " - " + message2.getMessage() + " - "
+                    + message2.getSentBy() + " - " + message2.getSentTo());
         }
+
+        return response;
+    }
+
+    private List<SessionMessage> getSessionsList() {
+        System.out.println("rest time...");
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<List<SessionMessage>> rateResponse =
+                restTemplate.exchange("http://session:8080/sessions",
+                        HttpMethod.GET, null, new ParameterizedTypeReference<List<SessionMessage>>() {
+                        });
+
+        System.out.println("Code: " + rateResponse.getStatusCodeValue());
+        List<SessionMessage> response = rateResponse.getBody();
+        System.out.println("There are " + response.size() + " messages. Neat.");
+        for (SessionMessage message2 : response) {
+            System.out.println("Content: " + message2.getTimestamp() + " - " + message2.getUsername() + " - " + message2.getGateway());
+        }
+
+        return response;
     }
 
     @Override
@@ -120,20 +209,16 @@ public class ChatEndpoint extends WebSocketServer {
 
     @Override
     public void onStart() {
-        try {
-            connectToLoadBalancer();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        connectToLoadBalancer();
         System.out.println("server started successfully");
     }
 
-    public void connectToLoadBalancer() throws UnknownHostException {
+    private void connectToLoadBalancer() {
         RestTemplate restTemplate = new RestTemplate();
         String gatewayAddress = getAddress().getHostString() + ":" + getAddress().getPort();
         HttpEntity<String> request = new HttpEntity<>(gatewayAddress);
         try {
-            Thread.sleep(20000);
+            Thread.sleep(90000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
