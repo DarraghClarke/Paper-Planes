@@ -57,11 +57,14 @@ public class ReceivingMessagesThread implements Runnable {
                         UserMessage response = (UserMessage) content;
                         System.out.println(response.getSentBy() + " -> " + response.getSentTo() + ": " + response.getMessage());
                         collection.insertOne(response);
+                        response.setProcessed(true);
 
                         RestTemplate restTemplate = new RestTemplate();
                         SessionMessage sessionMessage = restTemplate.getForObject("http://session:8080/sessions/" + response.getSentBy(), SessionMessage.class);
                         System.out.println("Opening socket to " + "ws://" + sessionMessage.getGateway() + ":8080/");
-                        new MessageForwardingClient(new URI("ws://" + sessionMessage.getGateway() + ":8080/"), response);
+                        MessageForwardingClient messageForwardingClient = new MessageForwardingClient(new URI("ws://" + sessionMessage.getGateway() + ":8080/"), response);
+                        Thread x = new Thread(messageForwardingClient);
+                        x.start();
                     }
                 } else {
                     System.out.println("Unknown message type: " + message.getClass().getCanonicalName());

@@ -20,7 +20,6 @@ public class MessageForwardingClient extends WebSocketClient {
     public void onOpen(ServerHandshake serverHandshake) {
         System.out.println("WebSocket connection opened!");
         sendUserMessage();
-        close();
     }
 
     @Override

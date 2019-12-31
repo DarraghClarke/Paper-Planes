@@ -21,7 +21,9 @@ public class Heartbeat implements  Runnable{
                         @Override
                         public void run() {
                             Gson gson= new Gson();
-                            SessionMessage heartbeat=new SessionMessage(System.currentTimeMillis(),client.username,client.gateway);
+                            // Gateway is null here because Client thinks the gateway to localhost. This isn't helpful,
+                            // so gateway will figure this out
+                            SessionMessage heartbeat = new SessionMessage(System.currentTimeMillis(),client.username,null);
                             String jsonStr = gson.toJson(heartbeat);
                             client.send(jsonStr);
                             System.out.println("we;ve done it again");

@@ -95,11 +95,14 @@ public class ChatEndpoint extends WebSocketServer {
 
         try {
             sessionMessage = new SessionMessage(userMessage.getTimestamp(), userMessage.getSentBy(), InetAddress.getLocalHost().getHostAddress());
+            System.out.println("Address is: " + InetAddress.getLocalHost().getHostAddress());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
 
         if (userMessage.isProcessed()) {
+            System.out.println( "This is a processed message");
+            System.out.println(userMessage.getSentBy() + " - "  + userMessage.getSentTo() + " - " + userMessage.getMessage());
             WebSocket connection = cache.get(userMessage.getSentTo());
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -115,7 +118,7 @@ public class ChatEndpoint extends WebSocketServer {
     }
 
     private void addUserToCache(SessionMessage sessionMessage, WebSocket socket) {
-        if (cache.containsKey(sessionMessage.getUsername())) {
+        if (!cache.containsKey(sessionMessage.getUsername())) {
             cache.put(sessionMessage.getUsername(), socket);
         }
     }
@@ -141,6 +144,13 @@ public class ChatEndpoint extends WebSocketServer {
     }
 
     private void sendSessionMessage(SessionMessage sessionMessage) {
+        if (sessionMessage.getGateway() == null) {
+            try {
+                sessionMessage.setGateway(InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+        }
         try {
             ConnectionFactory factory = new ActiveMQConnectionFactory("failover://tcp://activemq:61616");
             Connection connection = factory.createConnection();
@@ -164,7 +174,7 @@ public class ChatEndpoint extends WebSocketServer {
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<List<UserMessage>> rateResponse =
-                restTemplate.exchange("http://message-service:8080/history?sendTo="+chatLogRequest.getRequestingUser()+"&sendFrom="+chatLogRequest.getRequestedUser(),//todo make this address better
+                restTemplate.exchange("http://message-service:8080/history?sender="+chatLogRequest.getRequestingUser()+"&receiver="+chatLogRequest.getRequestedUser(),//todo make this address better
                         HttpMethod.GET, null, new ParameterizedTypeReference<List<UserMessage>>() {
                         });
 

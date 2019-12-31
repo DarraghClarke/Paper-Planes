@@ -13,8 +13,6 @@ import service.client.login.LoginController;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#client-example
 
@@ -28,7 +26,8 @@ public class Client extends WebSocketClient {
         super(serverURI);
         this.username = username;
         this.controller = controller;
-        gateway = serverURI.getHost();
+        gateway = serverURI.toString();
+        System.out.println("gateway host is " + gateway);
         controller.setClient(this);
     }
 
