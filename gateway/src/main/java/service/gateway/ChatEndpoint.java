@@ -15,7 +15,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -88,7 +94,9 @@ public class ChatEndpoint extends WebSocketServer {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(adapter).create();
 
-        message.Message messageObj = gson.fromJson(message, message.Message.class);
+        System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
+
+        Message messageObj = gson.fromJson(message, message.Message.class);
 
         // We check the type of the message received by the server, and depending on the type, process it differently
         switch (messageObj.getType()) {
