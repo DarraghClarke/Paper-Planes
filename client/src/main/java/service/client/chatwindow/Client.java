@@ -3,9 +3,7 @@ package service.client.chatwindow;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import message.ChatLogRequest;
-import message.SessionMessage;
-import message.UserMessage;
+import message.*;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import service.client.login.LoginController;
@@ -13,6 +11,7 @@ import service.client.login.LoginController;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#client-example
 
@@ -56,15 +55,38 @@ public class Client extends WebSocketClient {
     public void onMessage(String message) {
         Gson gson = new Gson();
         //this is meant to be a logic to sort different types of messages
-        if (message.contains("\"sentBy\":")){//element unique to userMessage tyoe
-            UserMessage msg = gson.fromJson(message, UserMessage.class);
-            controller.addToChat(msg);
-        } else if (message.contains("\"gateway\":")){//element unique to session type
-            Type collectionType = new TypeToken<ArrayList<SessionMessage>>(){}.getType();
-            ArrayList<SessionMessage> msg = (ArrayList<SessionMessage>) gson.fromJson( message , collectionType);
-            System.out.println("wow?");
-            controller.setOnline(msg);
+//        if (message.contains("\"sentBy\":")){//element unique to userMessage tyoe
+//            UserMessage msg = gson.fromJson(message, UserMessage.class);
+//            controller.addToChat(msg);
+//        } else if (message.contains("\"gateway\":")){//element unique to session type
+//            Type collectionType = new TypeToken<ArrayList<SessionMessage>>(){}.getType();
+//            ArrayList<SessionMessage> msg = (ArrayList<SessionMessage>) gson.fromJson( message , collectionType);
+//            System.out.println("wow?");
+//            controller.setOnline(msg);
+//        }
+        message.Message messageObj = gson.fromJson(message, message.Message.class);
+
+
+        switch (messageObj.getType()) {
+            case Message.MessageTypes.USER_MESSAGE:
+                UserMessage userMessage = (UserMessage) messageObj;
+                controller.addToChat(userMessage);
+                break;
+            case Message.MessageTypes.LIST_OF_SESSION_MESSAGES:
+                ListOfSessionMessages onlineStatus = (ListOfSessionMessages) messageObj;
+                System.out.println("wow?");
+                controller.setOnline(onlineStatus);
+                break;
+            case Message.MessageTypes.LIST_OF_USER_MESSAGES:
+                ListOfUserMessage chatHistory = (ListOfUserMessage) messageObj;
+                List<UserMessage> historyMessageList= chatHistory.getMessageList();
+
+                for(UserMessage messages: historyMessageList){
+                    controller.addToChat(messages);
+                }
+                break;
         }
+
     }
 
     @Override

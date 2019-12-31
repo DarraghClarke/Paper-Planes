@@ -20,6 +20,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import message.ListOfSessionMessages;
 import message.UserMessage;
 import message.SessionMessage;
 import service.client.messages.bubble.BubbleSpec;
@@ -108,9 +109,9 @@ public class Controller implements Initializable {
         }
     }
 
-    public void setOnline(ArrayList<SessionMessage> allUsers) {
+    public void setOnline(ListOfSessionMessages allUsers) {
         Platform.runLater(() -> {
-            ObservableList<SessionMessage> users = FXCollections.observableList(allUsers);
+            ObservableList<SessionMessage> users = FXCollections.observableList(allUsers.getMessageList());
             userList.getItems().clear();
             userList.setItems(users);
             userList.setCellFactory(new CellRenderer());
@@ -124,6 +125,7 @@ public class Controller implements Initializable {
                     client.setSelectedUserChatHistory(newValue.getUsername());
                     setUserInfo(newValue);
                     client.setUserSelection(newValue.getUsername());
+                    chatPane.getItems().clear();
                 }
                     });
         });
