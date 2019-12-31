@@ -9,12 +9,19 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 
 public class MessageForwardingClient extends WebSocketClient {
-    public MessageForwardingClient(URI serverUri) {
+    private UserMessage userMessage;
+
+    public MessageForwardingClient(URI serverUri, UserMessage userMessage) {
         super(serverUri);
+        this.userMessage = userMessage;
     }
 
     @Override
-    public void onOpen(ServerHandshake serverHandshake) {}
+    public void onOpen(ServerHandshake serverHandshake) {
+        System.out.println("WebSocket connection opened!");
+        sendUserMessage();
+        close();
+    }
 
     @Override
     public void onMessage(String s) {}
@@ -27,7 +34,7 @@ public class MessageForwardingClient extends WebSocketClient {
         e.printStackTrace();
     }
 
-    public void sendUserMessage(UserMessage userMessage) {
+    private void sendUserMessage() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         String jsonStr = gson.toJson(userMessage);

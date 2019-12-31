@@ -46,7 +46,7 @@ public class ReceivingMessagesThread implements Runnable {
             System.out.println("Connection Started");
 
 
-            MongoDatabase database = mongoClient.getDatabase("paper-planes");
+            MongoDatabase database = mongoClient.getDatabase("messages");
             MongoCollection<UserMessage> collection = database.getCollection("messages", UserMessage.class);
 
             while (true) {
@@ -59,10 +59,9 @@ public class ReceivingMessagesThread implements Runnable {
                         collection.insertOne(response);
 
                         RestTemplate restTemplate = new RestTemplate();
-                        SessionMessage sessionMessage = restTemplate.getForObject("http://session:8080/sessions", SessionMessage.class);
-
-                        MessageForwardingClient webSocketClient = new MessageForwardingClient(new URI("ws://" + sessionMessage.getGateway() + ":8080/"));
-                        webSocketClient.sendUserMessage(response);
+                        SessionMessage sessionMessage = restTemplate.getForObject("http://session:8080/sessions/" + response.getSentBy(), SessionMessage.class);
+                        System.out.println("Opening socket to " + "ws://" + sessionMessage.getGateway() + ":8080/");
+                        new MessageForwardingClient(new URI("ws://" + sessionMessage.getGateway() + ":8080/"), response);
                     }
                 } else {
                     System.out.println("Unknown message type: " + message.getClass().getCanonicalName());
