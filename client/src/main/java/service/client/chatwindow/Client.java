@@ -21,7 +21,6 @@ public class Client extends WebSocketClient {
     public String userSelected;
     public String gateway;
     public Controller controller;
-    private Map<String, ListOfChatMessages> cache = new HashMap<>();;
 
 
     public Client(URI serverURI, String username, Controller controller) {
@@ -29,7 +28,6 @@ public class Client extends WebSocketClient {
         this.username = username;
         this.controller = controller;
         gateway = serverURI.toString();
-        System.out.println("gateway host is " + gateway);
         controller.setClient(this);
     }
 
@@ -39,12 +37,14 @@ public class Client extends WebSocketClient {
         LoginController.getInstance().changeScene();
         controller.setupUserlist();
 
-        Gson gson= new Gson();
-        SessionMessage heartbeat=new SessionMessage(Instant.now().getEpochSecond(),username,null);
+        //this acts as one initial heartbeat before the timer stats
+        Gson gson = new Gson();
+        SessionMessage heartbeat = new SessionMessage(Instant.now().getEpochSecond(), username, null);
         String jsonStr = gson.toJson(heartbeat);
         send(jsonStr);
 
-        Thread thread= new Thread(new Heartbeat(Client.this));
+        //this hearbeat then sends hearbeats every 30 seconds
+        Thread thread = new Thread(new Heartbeat(Client.this));
         thread.start();
     }
 
@@ -67,10 +67,9 @@ public class Client extends WebSocketClient {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(adapter).create();
 
-        System.out.println("new message: " + message);
         message.Message messageObj = gson.fromJson(message, message.Message.class);
 
-
+        //this routes inbound messages based on type and then moves them to other methods
         switch (messageObj.getType()) {
             case Message.MessageTypes.USER_MESSAGE:
                 ChatMessage chatMessage = (ChatMessage) messageObj;
@@ -80,24 +79,14 @@ public class Client extends WebSocketClient {
                 break;
             case Message.MessageTypes.LIST_OF_SESSION_MESSAGES:
                 ListOfSessionMessages onlineStatus = (ListOfSessionMessages) messageObj;
-                System.out.println("wow?");
-            //    if (onlineStatus.getMessageList().size() > 0) {
-                    controller.setOnline(onlineStatus);
-            //    }
+                controller.setOnline(onlineStatus);
                 break;
             case Message.MessageTypes.LIST_OF_USER_MESSAGES:
                 ListOfChatMessages chatHistory = (ListOfChatMessages) messageObj;
-                List<ChatMessage> historyMessageList= chatHistory.getMessageList();
+                List<ChatMessage> historyMessageList = chatHistory.getMessageList();
 
-                if (!cache.containsKey(userSelected)) {
-                    cache.put(userSelected, chatHistory);
-                } else{
-                    cache.remove(userSelected);
-                    cache.put(userSelected, chatHistory);
-                }
-                if(userSelected.equals(chatHistory.getChatLogRequest().getRequestedUser()) && controller.numberOfMessages() == 0) {
+                if (userSelected.equals(chatHistory.getChatLogRequest().getRequestedUser()) && controller.numberOfMessages() == 0) {
                     for (ChatMessage messages : historyMessageList) {
-                        System.out.println("test");
                         controller.addToChat(messages);
                     }
                 }
@@ -111,7 +100,10 @@ public class Client extends WebSocketClient {
         System.err.println("an error occurred:" + ex);
     }
 
-
+    /**
+     * This takes in a text and constructs it into a message type and sends it on as JSON
+     * @param msg a users message
+     */
     public void sendMessage(String msg) {
         ChatMessage createChatMessage = new ChatMessage();
         createChatMessage.setSentBy(username);
@@ -127,22 +119,17 @@ public class Client extends WebSocketClient {
         getSelectedUserChatHistory(userSelected);
     }
 
-    public void setUserSelection(String selectedUser){
+    public void setUserSelection(String selectedUser) {
         userSelected = selectedUser;
     }
 
-    public void getSelectedUserChatHistory(String selectedUser){
+    /**
+     * This takes in a selected USER and creates a chatLogRequest to get the chat history
+     * @param selectedUser The user you want the history with
+     */
+    public void getSelectedUserChatHistory(String selectedUser) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonStr = gson.toJson(new ChatLogRequest(username,selectedUser));
-        System.out.println("sent");
+        String jsonStr = gson.toJson(new ChatLogRequest(username, selectedUser));
         send(jsonStr);
-
-//        if(cache.containsKey(username)) {
-//            ListOfChatMessages cachedChat = cache.get(selectedUser);
-//            for (ChatMessage messages : cachedChat.getMessageList()) {
-//                System.out.println("cached verstions");
-//                controller.addToChat(messages);
-//            }
-//        }
     }
 }
