@@ -14,7 +14,6 @@ public class ChatLogRequest extends Message {
         this.requestedUser = requestedUser;
     }
 
-
     public void setRequestedUser(String requestedUser) {
         this.requestedUser = requestedUser;
     }

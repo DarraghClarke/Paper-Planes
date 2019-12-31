@@ -16,6 +16,8 @@ public class Message implements Serializable {
     public static class MessageTypes {
         final public static String SESSION_MESSAGE = "SessionMessage";
         final public static String USER_MESSAGE = "UserMessage";
+        final public static String LIST_OF_SESSION_MESSAGES = "ListOfSessionMessages";
+        final public static String LIST_OF_USER_MESSAGES = "ListOfUserMessagesMessage";
         final public static String CHAT_LOG_REQUEST = "ChatLongRequest";
     }
 }
