@@ -46,7 +46,7 @@ public class LoginController implements Initializable {
         //RestTemplate restTemplate = new RestTemplate();
         //String gateway = restTemplate.getForObject("http://localhost:8081/gateways/random", String.class);
         System.out.println("finna connect...");
-        Client client = new Client(new URI("ws://192.168.99.100:8080/"), username, controller);
+        Client client = new Client(new URI("ws://localhost:8080/"), username, controller);
         Thread x = new Thread(client);
         x.start();
     }

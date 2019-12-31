@@ -80,11 +80,12 @@ public class ReceivingMessagesThread implements Runnable {
             MessageConsumer consumer = session.createConsumer(queue);
             Message message = consumer.receive();
 
+            message.acknowledge();
+
             // Close all connections
             connection.close();
             session.close();
             consumer.close();
-            message.acknowledge();
 
             return message;
         } catch (JMSException e) {

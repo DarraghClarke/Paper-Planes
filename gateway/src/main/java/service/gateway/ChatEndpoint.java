@@ -104,7 +104,7 @@ public class ChatEndpoint extends WebSocketServer {
                 break;
             case Message.MessageTypes.CHAT_LOG_REQUEST:
                 List<ChatMessage> messages = getChatLog((ChatLogRequest) messageObj);
-                ListOfChatMessages listOfChatMessages = new ListOfChatMessages(messages);
+                ListOfChatMessages listOfChatMessages = new ListOfChatMessages(messages, (ChatLogRequest) messageObj);
                 Gson builder = new GsonBuilder().setPrettyPrinting().create();
                 conn.send(builder.toJson(listOfChatMessages));
                 break;

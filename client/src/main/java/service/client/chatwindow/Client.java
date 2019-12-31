@@ -43,9 +43,9 @@ public class Client extends WebSocketClient {
         SessionMessage heartbeat=new SessionMessage(Instant.now().getEpochSecond(),username,null);
         String jsonStr = gson.toJson(heartbeat);
         send(jsonStr);
-//        System.out.println("we;ve done it again");
-//        Thread thread= new Thread(new Heartbeat(Client.this));
-//        thread.start();
+
+        Thread thread= new Thread(new Heartbeat(Client.this));
+        thread.start();
     }
 
 
@@ -79,9 +79,9 @@ public class Client extends WebSocketClient {
             case Message.MessageTypes.LIST_OF_SESSION_MESSAGES:
                 ListOfSessionMessages onlineStatus = (ListOfSessionMessages) messageObj;
                 System.out.println("wow?");
-                if (onlineStatus.getMessageList().size()>0){
+            //    if (onlineStatus.getMessageList().size() > 0) {
                     controller.setOnline(onlineStatus);
-                }
+            //    }
                 break;
             case Message.MessageTypes.LIST_OF_USER_MESSAGES:
                 ListOfChatMessages chatHistory = (ListOfChatMessages) messageObj;

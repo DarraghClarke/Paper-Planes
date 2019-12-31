@@ -27,9 +27,8 @@ public class Heartbeat implements  Runnable{
                             SessionMessage heartbeat = new SessionMessage(Instant.now().getEpochSecond(),client.username,null);
                             String jsonStr = gson.toJson(heartbeat);
                             client.send(jsonStr);
-                            System.out.println("we;ve done it again");
                         }
-                    }, 0, 30000);
+                    }, 0, 15000);
         }
 
 }
