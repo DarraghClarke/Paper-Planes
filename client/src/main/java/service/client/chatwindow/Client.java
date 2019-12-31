@@ -10,7 +10,9 @@ import service.client.login.LoginController;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //based on the sample implementation provided here: https://github.com/TooTallNate/Java-WebSocket/wiki#client-example
 
@@ -19,6 +21,8 @@ public class Client extends WebSocketClient {
     public String userSelected;
     public String gateway;
     public Controller controller;
+    private Map<String, ListOfChatMessages> cache = new HashMap<>();;
+
 
     public Client(URI serverURI, String username, Controller controller) {
         super(serverURI);
@@ -34,7 +38,7 @@ public class Client extends WebSocketClient {
         //this changes the ui to the chatroom view
         LoginController.getInstance().changeScene();
         controller.setupUserlist();
-//        System.out.println("new connection opened");
+
         Gson gson= new Gson();
         SessionMessage heartbeat=new SessionMessage(Instant.now().getEpochSecond(),username,null);
         String jsonStr = gson.toJson(heartbeat);
@@ -52,16 +56,6 @@ public class Client extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        //this is meant to be a logic to sort different types of messages
-//        if (message.contains("\"sentBy\":")){//element unique to userMessage tyoe
-//            ChatMessage msg = gson.fromJson(message, ChatMessage.class);
-//            controller.addToChat(msg);
-//        } else if (message.contains("\"gateway\":")){//element unique to session type
-//            Type collectionType = new TypeToken<ArrayList<SessionMessage>>(){}.getType();
-//            ArrayList<SessionMessage> msg = (ArrayList<SessionMessage>) gson.fromJson( message , collectionType);
-//            System.out.println("wow?");
-//            controller.setOnline(msg);
-//        }
 
         RuntimeTypeAdapterFactory<Message> adapter = RuntimeTypeAdapterFactory
                 .of(message.Message.class, "type")
@@ -91,6 +85,12 @@ public class Client extends WebSocketClient {
                 ListOfChatMessages chatHistory = (ListOfChatMessages) messageObj;
                 List<ChatMessage> historyMessageList= chatHistory.getMessageList();
 
+                if (!cache.containsKey(userSelected)) {
+                    cache.put(userSelected, chatHistory);
+                } else{
+                    cache.remove(userSelected);
+                    cache.put(userSelected, chatHistory);
+                }
                 for(ChatMessage messages: historyMessageList){
                     System.out.println("test");
                     controller.addToChat(messages);
@@ -116,7 +116,6 @@ public class Client extends WebSocketClient {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        // String jsonStr = gson.toJson(messageContainer);
         String jsonStr = gson.toJson(createChatMessage);
         send(jsonStr);
     }
@@ -130,5 +129,14 @@ public class Client extends WebSocketClient {
         String jsonStr = gson.toJson(new ChatLogRequest(username,selectedUser));
         System.out.println("sent");
         send(jsonStr);
+
+        if(cache.containsKey(username)) {
+            ListOfChatMessages cachedChat = cache.get(selectedUser);
+            for (ChatMessage messages : cachedChat.getMessageList()) {
+                System.out.println("cached verstions");
+                controller.addToChat(messages);
+            }
+        }
+
     }
 }
