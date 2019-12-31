@@ -47,6 +47,7 @@ public class Controller implements Initializable {
 
     private String username;
     private Client client;
+    private String selectedUser = "";
 
 
     public void sendButtonAction() throws IOException {
@@ -120,12 +121,14 @@ public class Controller implements Initializable {
             userList.getSelectionModel().selectedItemProperty().addListener((ChangeListener<SessionMessage>)
                     (observable, oldValue, newValue) -> {
                     if(oldValue !=null) {
-                        if (newValue != null && newValue.getUsername() != oldValue.getUsername()) {
+                        if (newValue != null && !newValue.getUsername().equals(selectedUser)) {
+                            selectedUser = newValue.getUsername();
                             updateUI(newValue);
 
                         }
                     } else{//this is a special case for the very first time this is selected
-                        if (newValue != null) {
+                        if (newValue != null && !newValue.getUsername().equals(selectedUser)) {
+                            selectedUser = newValue.getUsername();
                             updateUI(newValue);
                         }
                     }
@@ -138,7 +141,7 @@ public class Controller implements Initializable {
         inputBox.clear();
         inputBox.editableProperty().setValue(true);
         inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
-        System.out.println("Selected item: " + newValue.getUsername());
+        System.out.println("Selected item: " + newValue.getUsername() + selectedUser);
         chatPane.getItems().clear();
         client.setSelectedUserChatHistory(newValue.getUsername());
         setUserInfo(newValue);

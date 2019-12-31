@@ -34,13 +34,13 @@ public class Client extends WebSocketClient {
         LoginController.getInstance().changeScene();
         controller.setupUserlist();
 //        System.out.println("new connection opened");
-//        Gson gson= new Gson();
-//        SessionMessage heartbeat=new SessionMessage(System.currentTimeMillis(),username,gateway);
-//        String jsonStr = gson.toJson(heartbeat);
-//        send(jsonStr);
+        Gson gson= new Gson();
+        SessionMessage heartbeat=new SessionMessage(System.currentTimeMillis(),username,gateway);
+        String jsonStr = gson.toJson(heartbeat);
+        send(jsonStr);
 //        System.out.println("we;ve done it again");
-        Thread thread= new Thread(new Heartbeat(Client.this));
-        thread.start();
+//        Thread thread= new Thread(new Heartbeat(Client.this));
+//        thread.start();
     }
 
 
