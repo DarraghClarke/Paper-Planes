@@ -2,7 +2,6 @@ package service.client.chatwindow;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -13,20 +12,22 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import message.Message;
+import message.UserMessage;
 import message.SessionMessage;
 import service.client.messages.bubble.BubbleSpec;
 import service.client.messages.bubble.BubbledLabel;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 
@@ -54,7 +55,7 @@ public class Controller implements Initializable {
         }
     }
 
-    public synchronized void addToChat(Message msg) {
+    public synchronized void addToChat(UserMessage msg) {
         Task<HBox> othersMessages = new Task<HBox>() {
             @Override
             public HBox call() {
@@ -63,8 +64,8 @@ public class Controller implements Initializable {
                 label.setText(msg.getMessage());
                 label.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, null, null)));
                 label.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
-                LocalDateTime time = LocalDateTime.ofInstant(msg.getTime(), ZoneId.systemDefault());
-                hBox.getChildren().addAll(new Label(msg.getSender()), label, new Label(time.getHour() + ":" + time.getMinute()));
+                Long time =msg.getTimestamp();
+                hBox.getChildren().addAll(new Label(msg.getSentBy()), label, new Label(time.toString()));//todo check time label
                 return hBox;
             }
         };
@@ -81,14 +82,14 @@ public class Controller implements Initializable {
                 label.setText(msg.getMessage());
                 label.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, null, null)));
                 label.setBubbleSpec(BubbleSpec.FACE_RIGHT_CENTER);
-                LocalDateTime time = LocalDateTime.ofInstant(msg.getTime(), ZoneId.systemDefault());
-                hBox.getChildren().addAll(new Label(time.getHour() + ":" + time.getMinute()), label, new Label(msg.getSender()));
+                Long time =msg.getTimestamp();
+                hBox.getChildren().addAll(new Label(time.toString()), label, new Label(msg.getSentBy()));//todo check time label
                 return hBox;
             }
         };
         localMessages.setOnSucceeded(event -> chatPane.getItems().add(localMessages.getValue()));
 
-        if (msg.getSender().equals(username)) {
+        if (msg.getSentBy().equals(username)) {
             Thread thread = new Thread(localMessages);
             thread.setDaemon(true);
             thread.start();
@@ -115,11 +116,19 @@ public class Controller implements Initializable {
             userList.setCellFactory(new CellRenderer());
             userList.getSelectionModel().selectedItemProperty().addListener((ChangeListener<SessionMessage>)
                     (observable, oldValue, newValue) -> {
+//                        inputBox.editableProperty().setValue(true);
+//                        inputBox.clear();
                         System.out.println("Selected item: " + newValue.getUsername());
+                        client.setSelectedUserChatHistory(newValue.getUsername());
                         setUserInfo(newValue);
+                        client.setUserSelection(newValue.getUsername());
                     });
         });
 
+    }
+
+    public void setupUserlist(){
+        userList.getItems().add("Connecting to server");
     }
 
     public void setUsername(String username) {
@@ -127,8 +136,14 @@ public class Controller implements Initializable {
     }
 
     public void sendMethod(KeyEvent event) throws IOException {
-        if (event.getCode() == KeyCode.ENTER) {
+
+        if (event.getCode() == KeyCode.ENTER && !event.isShiftDown()) {
+            event.consume();
             sendButtonAction();
+        } else if (event.getCode() == KeyCode.ENTER && event.isShiftDown() ) {
+            int tmp=inputBox.getCaretPosition();
+            inputBox.setText(inputBox.getText()+ "\n");
+            inputBox.positionCaret(tmp+1);
         }
     }
 
