@@ -1,15 +1,16 @@
 package message;
 
-import java.io.Serializable;
-
-public class SessionMessage implements Serializable {
+public class SessionMessage extends Message {
     private long timestamp;
     private String username;
     private String gateway;
 
-    public SessionMessage() {}
+    public SessionMessage() {
+        super(Message.MessageTypes.SESSION_MESSAGE);
+    }
 
     public SessionMessage(long timestamp, String username, String gateway) {
+        super(Message.MessageTypes.SESSION_MESSAGE);
         this.timestamp = timestamp;
         this.username = username;
         this.gateway = gateway;

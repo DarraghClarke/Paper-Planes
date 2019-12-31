@@ -15,7 +15,7 @@ import java.util.List;
 public class Application {
     public static void main(String[] args) {
         try {
-            Thread.sleep(10000);
+            Thread.sleep(20000);
             System.out.println("baby-client starting.");
             String host = "localhost";
 
@@ -49,6 +49,9 @@ public class Application {
 
             System.out.println("rest time...");
             RestTemplate restTemplate = new RestTemplate();
+
+            SessionMessage current = restTemplate.getForObject("http://session:8080/sessions/oisinq-baby", SessionMessage.class);
+            System.out.println(current.getGateway() + " - " + current.getUsername() + " - " + current.getTimestamp());
 
             ResponseEntity<List<SessionMessage>> rateResponse =
                     restTemplate.exchange("http://session:8080/sessions",

@@ -1,27 +1,40 @@
 version: "3"
 
 services:
-#  client:
-#    build: client
+#  gateway:
+#    build: gateway
+#    ports:
+#      - "8080:8080"
 #    depends_on:
-#      - gateway
-  gateway:
-    build: gateway
-    ports:
-      - "8080:8080"
-    depends_on:
-      - load-balancer
-  load-balancer:
-    build: load-balancer
-    ports:
-      - "8081:8081"
-    depends_on:
-      - session
-  session:
-    build: session
+#      - load-balancer
+#  load-balancer:
+#    build: load-balancer
+#    ports:
+#      - "8081:8081"
+#    depends_on:
+#      - session
+#  session:
+#    build: session
+#    depends_on:
+#      - mongo
+#      - activemq
+#  session-test-client:
+#    build: session-test-client
+#    depends_on:
+#      - mongo
+#      - activemq
+#      - session
+  message-service:
+    build: message-service
     depends_on:
       - mongo
       - activemq
+  message-service-test:
+    build: message-service-test
+    depends_on:
+      - mongo
+      - activemq
+      - message-service
   activemq:
     image: rmohr/activemq:latest
     container_name: activemq
@@ -30,9 +43,3 @@ services:
       - "61616:61616"
   mongo:
     image: mongo:4.0.4
-#  session-test-client:
-#    build: session-test-client
-#    depends_on:
-#      - mongo
-#      - activemq
-#      - session

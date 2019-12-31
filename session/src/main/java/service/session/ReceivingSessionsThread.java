@@ -39,7 +39,7 @@ public class ReceivingSessionsThread implements Runnable {
 
             // This while loop means the program is always listening for the next message
             while (true) {
-                MongoDatabase database = mongoClient.getDatabase("sessions");
+                MongoDatabase database = mongoClient.getDatabase("paper-planes");
                 MongoCollection<SessionMessage> collection = database.getCollection("sessions", SessionMessage.class);
 
                 // We retrieve the message from the queue and check it is a ClientApplicationMessage
@@ -64,7 +64,7 @@ public class ReceivingSessionsThread implements Runnable {
 
                     FindIterable<SessionMessage> cursor = collection.find();
 
-                    System.out.println("Status update:\nWe've got: " + collection.countDocuments());
+                    System.out.println("Status update:\nWe've got: " + collection);
 
                     for (SessionMessage sessionMessage : cursor) {
                         System.out.println(sessionMessage.getUsername() + " - " + sessionMessage.getGateway()

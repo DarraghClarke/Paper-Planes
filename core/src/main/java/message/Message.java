@@ -1,45 +1,21 @@
 package message;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 public class Message implements Serializable {
+    private String type;
 
-    private String sender;
-    private String message;
-    private String reciever;
-    private Instant time;
-
-    public Message() {
+    public Message(String type) {
+        this.type = type;
     }
 
-    public String getSender() {
-        return sender;
+    public String getType() {
+        return type;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public String getMessage() { return message; }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getReciever(){
-        return reciever;
-    }
-
-    public void setReciever(String reciever){
-        this.reciever = reciever;
-    }
-
-    public void setTime(Instant time){
-        this.time=time;
-    }
-
-    public Instant getTime() {
-        return time;
+    public static class MessageTypes {
+        final public static String SESSION_MESSAGE = "SessionMessage";
+        final public static String USER_MESSAGE = "UserMessage";
+        final public static String CHAT_LOG_REQUEST = "ChatLongRequest";
     }
 }

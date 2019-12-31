@@ -4,15 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>paper-planes</groupId>
-    <artifactId>gateway</artifactId>
+    <artifactId>message-service-test</artifactId>
     <version>0.1.0</version>
 
     <properties>
-        <main.class>service.gateway.ChatEndpoint</main.class>
+        <main.class>client.Application</main.class>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-
 
     <dependencies>
         <dependency>
@@ -42,19 +41,15 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.10</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-        </dependency>
-        <dependency>
             <groupId>paper-planes</groupId>
             <artifactId>core</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>paper-planes</groupId>
+            <artifactId>gateway</artifactId>
+            <version>0.1.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
