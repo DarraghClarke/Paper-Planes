@@ -116,12 +116,15 @@ public class Controller implements Initializable {
             userList.setCellFactory(new CellRenderer());
             userList.getSelectionModel().selectedItemProperty().addListener((ChangeListener<SessionMessage>)
                     (observable, oldValue, newValue) -> {
-//                        inputBox.editableProperty().setValue(true);
-//                        inputBox.clear();
-                        System.out.println("Selected item: " + newValue.getUsername());
-                        client.setSelectedUserChatHistory(newValue.getUsername());
-                        setUserInfo(newValue);
-                        client.setUserSelection(newValue.getUsername());
+                if(newValue!= null && newValue.getUsername() != oldValue.getUsername()) {
+                    inputBox.clear();
+                    inputBox.editableProperty().setValue(true);
+                    inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
+                    System.out.println("Selected item: " + newValue.getUsername());
+                    client.setSelectedUserChatHistory(newValue.getUsername());
+                    setUserInfo(newValue);
+                    client.setUserSelection(newValue.getUsername());
+                }
                     });
         });
 
