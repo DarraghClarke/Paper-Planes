@@ -93,9 +93,11 @@ public class Client extends WebSocketClient {
                     cache.remove(userSelected);
                     cache.put(userSelected, chatHistory);
                 }
-                for(ChatMessage messages: historyMessageList){
-                    System.out.println("test");
-                    controller.addToChat(messages);
+                if(userSelected== chatHistory.getChatLogRequest().getRequestedUser()) {
+                    for (ChatMessage messages : historyMessageList) {
+                        System.out.println("test");
+                        controller.addToChat(messages);
+                    }
                 }
                 break;
         }
