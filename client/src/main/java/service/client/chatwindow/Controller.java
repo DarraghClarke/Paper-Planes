@@ -156,8 +156,6 @@ public class Controller implements Initializable {
     }
 
     public void setupUserlist() {
-        Stage thisStage=(Stage)inputBox.getScene().getWindow();
-        thisStage.setTitle("Paper Planes - Logged in as "+ username);
         userList.getItems().add("Connecting to server");
         inputBox.deselect();
     }
