@@ -1,5 +1,9 @@
 package message;
 
+/**
+ * SessionMessage – Message that signifies the current status of a user. Used to track which gateway a client is connected
+ * to and the latest time of activity. Also used to calculate if a user is actively using the system or if they're offline.
+ */
 public class SessionMessage extends Message {
     private long timestamp;
     private String username;

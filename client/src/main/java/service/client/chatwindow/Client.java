@@ -53,7 +53,7 @@ public class Client extends WebSocketClient {
     public void onMessage(String message) {
         //this is meant to be a logic to sort different types of messages
 //        if (message.contains("\"sentBy\":")){//element unique to userMessage tyoe
-//            UserMessage msg = gson.fromJson(message, UserMessage.class);
+//            ChatMessage msg = gson.fromJson(message, ChatMessage.class);
 //            controller.addToChat(msg);
 //        } else if (message.contains("\"gateway\":")){//element unique to session type
 //            Type collectionType = new TypeToken<ArrayList<SessionMessage>>(){}.getType();
@@ -65,9 +65,9 @@ public class Client extends WebSocketClient {
         RuntimeTypeAdapterFactory<Message> adapter = RuntimeTypeAdapterFactory
                 .of(message.Message.class, "type")
                 .registerSubtype(SessionMessage.class, Message.MessageTypes.SESSION_MESSAGE)
-                .registerSubtype(UserMessage.class, Message.MessageTypes.USER_MESSAGE)
+                .registerSubtype(ChatMessage.class, Message.MessageTypes.USER_MESSAGE)
                 .registerSubtype(ChatLogRequest.class, Message.MessageTypes.CHAT_LOG_REQUEST)
-                .registerSubtype(ListOfUserMessages.class, Message.MessageTypes.LIST_OF_USER_MESSAGES)
+                .registerSubtype(ListOfChatMessages.class, Message.MessageTypes.LIST_OF_USER_MESSAGES)
                 .registerSubtype(ListOfSessionMessages.class, Message.MessageTypes.LIST_OF_SESSION_MESSAGES);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapterFactory(adapter).create();
@@ -78,8 +78,8 @@ public class Client extends WebSocketClient {
 
         switch (messageObj.getType()) {
             case Message.MessageTypes.USER_MESSAGE:
-                UserMessage userMessage = (UserMessage) messageObj;
-                controller.addToChat(userMessage);
+                ChatMessage chatMessage = (ChatMessage) messageObj;
+                controller.addToChat(chatMessage);
                 break;
             case Message.MessageTypes.LIST_OF_SESSION_MESSAGES:
                 ListOfSessionMessages onlineStatus = (ListOfSessionMessages) messageObj;
@@ -87,10 +87,10 @@ public class Client extends WebSocketClient {
                 controller.setOnline(onlineStatus);
                 break;
             case Message.MessageTypes.LIST_OF_USER_MESSAGES:
-                ListOfUserMessages chatHistory = (ListOfUserMessages) messageObj;
-                List<UserMessage> historyMessageList= chatHistory.getMessageList();
+                ListOfChatMessages chatHistory = (ListOfChatMessages) messageObj;
+                List<ChatMessage> historyMessageList= chatHistory.getMessageList();
 
-                for(UserMessage messages: historyMessageList){
+                for(ChatMessage messages: historyMessageList){
                     System.out.println("test");
                     controller.addToChat(messages);
                 }
@@ -106,16 +106,16 @@ public class Client extends WebSocketClient {
 
 
     public void sendMessage(String msg) {
-        UserMessage createUserMessage = new UserMessage();
-        createUserMessage.setSentBy(username);
-        createUserMessage.setTimestamp(System.currentTimeMillis());
-        createUserMessage.setMessage(msg);
-        createUserMessage.setSentTo(userSelected);
-        controller.addToChat(createUserMessage);//this makes the message appear for the user in the chat panel
+        ChatMessage createChatMessage = new ChatMessage();
+        createChatMessage.setSentBy(username);
+        createChatMessage.setTimestamp(System.currentTimeMillis());
+        createChatMessage.setMessage(msg);
+        createChatMessage.setSentTo(userSelected);
+        controller.addToChat(createChatMessage);//this makes the message appear for the user in the chat panel
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         // String jsonStr = gson.toJson(messageContainer);
-        String jsonStr = gson.toJson(createUserMessage);
+        String jsonStr = gson.toJson(createChatMessage);
         send(jsonStr);
     }
 

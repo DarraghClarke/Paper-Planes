@@ -3,8 +3,8 @@ package service.messageService;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import message.ChatMessage;
 import message.SessionMessage;
-import message.UserMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -47,14 +47,14 @@ public class ReceivingMessagesThread implements Runnable {
 
 
             MongoDatabase database = mongoClient.getDatabase("paper-planes");
-            MongoCollection<UserMessage> collection = database.getCollection("messages", UserMessage.class);
+            MongoCollection<ChatMessage> collection = database.getCollection("messages", ChatMessage.class);
 
             while (true) {
                 Message message = consumer.receive();
                 if (message instanceof ObjectMessage) {
                     Object content = ((ObjectMessage) message).getObject();
-                    if (content instanceof UserMessage) {
-                        UserMessage response = (UserMessage) content;
+                    if (content instanceof ChatMessage) {
+                        ChatMessage response = (ChatMessage) content;
                         System.out.println(response.getSentBy() + " -> " + response.getSentTo() + ": " + response.getMessage());
                         collection.insertOne(response);
                         response.setProcessed(true);

@@ -9,12 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * BalanacerService – REST Controller used to provide clients with a gateway to connect to
+ */
 @RestController
-public class Balancer {
+public class BalancerService {
 
     List<String> gateways = new ArrayList<>();
 
-    @GetMapping("/getGateway")
+    @GetMapping("/gateways/random")
     public String getGateway() {
         if (gateways.isEmpty()) {
             throw new InternalError("No Gateways Available");
@@ -50,7 +53,7 @@ public class Balancer {
         return address.isReachable(10000);
     }
 
-    @PostMapping("/addGateway")
+    @PostMapping("/gateways")
     public void addGateway(@RequestBody String gatewayInfo) throws MalformedURLException {
 
         gateways.add(gatewayInfo);

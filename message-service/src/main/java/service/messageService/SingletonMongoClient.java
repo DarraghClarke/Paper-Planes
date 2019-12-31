@@ -2,7 +2,7 @@ package service.messageService;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
-import message.UserMessage;
+import message.ChatMessage;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
@@ -18,7 +18,7 @@ public class SingletonMongoClient {
     public static MongoClient getInstance() {
         if (SINGLE_INSTANCE == null) {
             CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
-                    fromProviders(PojoCodecProvider.builder().automatic(true).register(UserMessage.class).build()));
+                    fromProviders(PojoCodecProvider.builder().automatic(true).register(ChatMessage.class).build()));
 
             SINGLE_INSTANCE = new MongoClient("mongo:27017",
                     MongoClientOptions.builder().codecRegistry(pojoCodecRegistry).build());

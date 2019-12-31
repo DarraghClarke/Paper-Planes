@@ -3,6 +3,10 @@ package message;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ListOfSessionMessages – message passed between containers containing a list of all SessionMessages in the system:
+ * used to display the user list in the client
+ */
 public class ListOfSessionMessages extends Message {
     private List<SessionMessage> messageList;
 

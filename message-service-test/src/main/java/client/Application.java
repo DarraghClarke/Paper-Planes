@@ -1,6 +1,6 @@
 package client;
 
-import message.UserMessage;
+import message.ChatMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
@@ -24,7 +24,7 @@ public class Application {
             System.out.println("Queue created");
             MessageProducer producer = session.createProducer(requestsQueue);
 
-            UserMessage message = new UserMessage();
+            ChatMessage message = new ChatMessage();
             message.setMessage("hello");
             message.setSentTo("Sinead");
             message.setSentBy("Cooper");

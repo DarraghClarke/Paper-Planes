@@ -2,18 +2,18 @@ package service.messageService;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import message.UserMessage;
+import message.ChatMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 
 public class MessageForwardingClient extends WebSocketClient {
-    private UserMessage userMessage;
+    private ChatMessage chatMessage;
 
-    public MessageForwardingClient(URI serverUri, UserMessage userMessage) {
+    public MessageForwardingClient(URI serverUri, ChatMessage chatMessage) {
         super(serverUri);
-        this.userMessage = userMessage;
+        this.chatMessage = chatMessage;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class MessageForwardingClient extends WebSocketClient {
     private void sendUserMessage() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        String jsonStr = gson.toJson(userMessage);
+        String jsonStr = gson.toJson(chatMessage);
         send(jsonStr);
     }
 }

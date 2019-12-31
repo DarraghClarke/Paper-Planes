@@ -12,8 +12,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -21,14 +19,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import message.ListOfSessionMessages;
-import message.UserMessage;
+import message.ChatMessage;
 import message.SessionMessage;
 import service.client.messages.bubble.BubbleSpec;
 import service.client.messages.bubble.BubbledLabel;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 
@@ -57,7 +54,7 @@ public class Controller implements Initializable {
         }
     }
 
-    public synchronized void addToChat(UserMessage msg) {
+    public synchronized void addToChat(ChatMessage msg) {
         Task<HBox> othersMessages = new Task<HBox>() {
             @Override
             public HBox call() {
