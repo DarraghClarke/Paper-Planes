@@ -50,6 +50,9 @@ public class Application {
             System.out.println("rest time...");
             RestTemplate restTemplate = new RestTemplate();
 
+            SessionMessage current = restTemplate.getForObject("http://session:8080/sessions/oisinq-baby", SessionMessage.class);
+            System.out.println(current.getGateway() + " - " + current.getUsername() + " - " + current.getTimestamp());
+
             ResponseEntity<List<SessionMessage>> rateResponse =
                     restTemplate.exchange("http://session:8080/sessions",
                             HttpMethod.GET, null, new ParameterizedTypeReference<List<SessionMessage>>() {

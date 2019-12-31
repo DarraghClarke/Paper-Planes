@@ -3,6 +3,7 @@ package service.messageService;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import message.SessionMessage;
 import message.UserMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.web.client.RestTemplate;
@@ -58,9 +59,9 @@ public class ReceivingMessagesThread implements Runnable {
                         collection.insertOne(response);
 
                         RestTemplate restTemplate = new RestTemplate();
-                        String gateway = restTemplate.getForObject("http://session:8080/sessions", String.class);
+                        SessionMessage sessionMessage = restTemplate.getForObject("http://session:8080/sessions", SessionMessage.class);
 
-                        MessageForwardingClient webSocketClient = new MessageForwardingClient(new URI("ws://" + gateway + ":8080/"));
+                        MessageForwardingClient webSocketClient = new MessageForwardingClient(new URI("ws://" + sessionMessage.getGateway() + ":8080/"));
                         webSocketClient.sendUserMessage(response);
                     }
                 } else {

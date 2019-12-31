@@ -17,16 +17,16 @@ public class SessionsService {
     public SessionsService() {
         try {
             MongoClient mongoClient = SingletonMongoClient.getInstance();
-            MongoDatabase database = mongoClient.getDatabase("sessions");
+            MongoDatabase database = mongoClient.getDatabase("paper-planes");
             collection = database.getCollection("sessions", SessionMessage.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @RequestMapping(value="sessions/{reference}",method=RequestMethod.GET)
+    @RequestMapping(value="sessions/{user_id}",method=RequestMethod.GET)
     public SessionMessage getSession(@PathVariable("user_id") String userId) {
-        return collection.find(new BasicDBObject().append("user_id", userId)).first();
+        return collection.find(new BasicDBObject().append("username", userId)).first();
     }
 
     @RequestMapping(value="sessions",
