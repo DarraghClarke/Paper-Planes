@@ -18,7 +18,7 @@
                <children>
                   <BorderPane prefHeight="26.0" prefWidth="873.0">
                      <center>
-                        <Label fx:id="userInfo" prefHeight="18.0" prefWidth="358.0" text="Welcome!" BorderPane.alignment="CENTER" />
+                        <Label fx:id="userInfo" prefHeight="18.0" prefWidth="358.0" text="Welcome!- Please select a user to talk to from the left panel" BorderPane.alignment="CENTER" />
                      </center>
                   </BorderPane>
                </children>

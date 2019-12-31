@@ -18,6 +18,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import message.ListOfSessionMessages;
 import message.ChatMessage;
 import message.SessionMessage;
@@ -110,9 +111,9 @@ public class Controller implements Initializable {
 
     public void setUserInfo(SessionMessage user) {
         if (Instant.now().getEpochSecond() - user.getTimestamp() > 60) {//i think this means last minute online
-            userInfo.setText(user.getUsername() + "-Last online: " + (Instant.now().getEpochSecond() - user.getTimestamp()) / 60 + " minutes ago");
+            userInfo.setText(user.getUsername() + ": Last online " + (Instant.now().getEpochSecond() - user.getTimestamp()) / 60 + " minutes ago");
         } else {
-            userInfo.setText(user.getUsername() + "-Online Now");
+            userInfo.setText(user.getUsername() + ": gOnline Now");
         }
     }
 
@@ -149,6 +150,8 @@ public class Controller implements Initializable {
         inputBox.setPromptText("Enter message to " + newValue.getUsername() + " here...");
         System.out.println("Selected item: " + newValue.getUsername() + selectedUser);
         chatPane.getItems().clear();
+        Stage thisStage=(Stage)inputBox.getScene().getWindow();
+        thisStage.setTitle("Paper Planes - "+ newValue.getUsername());
         client.setSelectedUserChatHistory(newValue.getUsername());
         setUserInfo(newValue);
         client.setUserSelection(newValue.getUsername());

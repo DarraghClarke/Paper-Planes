@@ -29,8 +29,8 @@ class CellRenderer implements Callback<ListView<SessionMessage>, ListCell<Sessio
                         if (user != null) {
                             HBox hBox = new HBox();
 
-                            Text username = new Text(user.getUsername());//atm just adds user name
-                            Circle circle = new Circle(0, 0, 10);
+                            Text username = new Text(user.getUsername() + "  ");//add user name and a space
+                            Circle circle = new Circle(0, 0, 8);
                             if(Instant.now().getEpochSecond() - user.getTimestamp() > 60 ){
                                 //online in the last minute
                                 circle.setFill(Color.GRAY);
