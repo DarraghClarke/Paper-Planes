@@ -52,8 +52,8 @@ The system should be ready to go when it displays the message:
 
 # Authors
 
-* Oisín Quinn - @oisinq
-* Darragh Clarke – @DarraghClarke
-* Sinéad Farrell - @sineadfarrell
+* Oisín Quinn - [@oisinq](http://www.github.com/oisinq)
+* Darragh Clarke – [@DarraghClarke](http://www.github.com/darraghclarke)
+* Sinéad Farrell - [@sineadfarrell](http://www.github.com/sineadfarrell)
 
 Created as a standalone group project for [COMP30220](http://www.ucd.ie/modules/comp30220).
