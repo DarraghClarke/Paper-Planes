@@ -55,3 +55,5 @@ The system should be ready to go when it displays the message:
 * Oisín Quinn - @oisinq
 * Darragh Clarke – @DarraghClarke
 * Sinéad Farrell - @sineadfarrell
+
+Created as a standalone group project for [COMP30220](http://www.ucd.ie/modules/comp30220).
